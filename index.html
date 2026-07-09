@@ -206,7 +206,8 @@
                     <input type="text" id="marketSearch" placeholder="Search markets..." class="w-full bg-app-bg border border-border-color rounded-lg py-2.5 pl-10 pr-3 text-sm text-text-primary focus:border-neon-cyan focus:shadow-glow-cyan transition-all placeholder-text-secondary/50">
                 </div>
                 <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs font-mono font-bold uppercase tracking-wider" id="categoryFilters">
-                    <button class="px-3 py-1.5 rounded bg-neon-cyan text-black" onclick="setCategory('All', this)">Crypto</button>
+                    <button class="px-3 py-1.5 rounded bg-neon-cyan text-black transition-colors" onclick="setCategory('All', this)">All</button>
+                    <button class="px-3 py-1.5 rounded text-text-secondary hover:text-neon-cyan transition-colors" onclick="setCategory('Crypto', this)">Crypto</button>
                 </div>
             </div>
 
@@ -238,8 +239,12 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <div class="bg-panel-bg border border-border-color rounded-lg p-1 hidden sm:flex">
-                        <button class="px-2 py-1 text-xs font-mono rounded bg-panel-hover text-text-primary">15m</button>
+                    <div class="bg-panel-bg border border-border-color rounded-lg p-1 hidden sm:flex gap-1" id="tf-selector">
+                        <button class="px-2 py-1 text-xs font-mono rounded text-text-secondary hover:text-text-primary transition-colors" onclick="setTimeframe('1m', this)">1m</button>
+                        <button class="px-2 py-1 text-xs font-mono rounded text-text-secondary hover:text-text-primary transition-colors" onclick="setTimeframe('5m', this)">5m</button>
+                        <button class="px-2 py-1 text-xs font-mono rounded bg-panel-hover text-text-primary transition-colors" onclick="setTimeframe('15m', this)">15m</button>
+                        <button class="px-2 py-1 text-xs font-mono rounded text-text-secondary hover:text-text-primary transition-colors" onclick="setTimeframe('1H', this)">1H</button>
+                        <button class="px-2 py-1 text-xs font-mono rounded text-text-secondary hover:text-text-primary transition-colors" onclick="setTimeframe('1D', this)">1D</button>
                     </div>
                     <button class="px-4 py-2 rounded-lg bg-neon-cyan/10 border border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-black hover:shadow-glow-cyan text-xs font-bold transition-all shadow-sm flex items-center gap-2 uppercase tracking-wide" onclick="toggleTradeWidget()">
                         <i class="ph-fill ph-target"></i> Execute
@@ -247,41 +252,58 @@
                 </div>
             </div>
 
-            <!-- Chart Container -->
-            <div class="flex-1 w-full h-full pt-14 relative bg-[#05050A]" id="tv_chart_container">
-                <div class="chart-loader" id="chartLoader">
-                    <i class="ph ph-circle-notch animate-spin text-3xl text-neon-cyan"></i>
-                    <span class="text-xs font-mono text-neon-cyan tracking-widest uppercase">Syncing Node Data...</span>
+            <!-- Chart Container & Drawing Toolbar -->
+            <div class="flex-1 w-full h-full pt-14 flex relative bg-[#05050A]">
+                <!-- Drawing Tools Side Panel -->
+                <div class="w-12 border-r border-border-color bg-panel-bg flex flex-col items-center py-4 gap-4 z-10 shrink-0 shadow-lg">
+                    <button id="tool-cursor" class="w-8 h-8 rounded text-neon-cyan bg-neon-cyan/10 flex items-center justify-center transition-all border border-neon-cyan/30" onclick="setTool('cursor')" title="Cursor">
+                        <i class="ph ph-cursor text-lg"></i>
+                    </button>
+                    <button id="tool-hline" class="w-8 h-8 rounded text-text-secondary hover:text-neon-cyan hover:bg-neon-cyan/10 flex items-center justify-center transition-all border border-transparent hover:border-neon-cyan/30" onclick="setTool('hline')" title="Draw Horizontal Level">
+                        <i class="ph ph-minus text-lg font-bold"></i>
+                    </button>
+                    <div class="flex-1"></div>
+                    <button class="w-8 h-8 rounded text-text-secondary hover:text-neon-magenta hover:bg-neon-magenta/10 flex items-center justify-center transition-all border border-transparent hover:border-neon-magenta/30" onclick="clearDrawings()" title="Clear Drawings">
+                        <i class="ph ph-trash text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Actual Chart Canvas Container -->
+                <div class="flex-1 relative h-full w-full overflow-hidden" id="tv_chart_container">
+                    <div class="chart-loader" id="chartLoader">
+                        <i class="ph ph-circle-notch animate-spin text-3xl text-neon-cyan"></i>
+                        <span class="text-xs font-mono text-neon-cyan tracking-widest uppercase">Syncing Node Data...</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Cyber Quick Trade Widget HUD -->
-            <div id="quickTradeWidget" class="absolute top-20 left-4 glass rounded-2xl shadow-panel p-5 z-30 w-72 flex flex-col gap-5 border border-border-color hidden md:flex backdrop-blur-2xl bg-black/60">
-                <div class="flex justify-between items-center border-b border-border-color pb-3">
-                    <span class="font-black text-text-primary text-lg" id="qt-symbol">BTCUSDT</span>
-                    <div class="flex items-center bg-app-bg border border-border-color rounded-lg p-1 shadow-inner">
-                        <button class="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-neon-cyan" onclick="adjustVolume(-0.01)"><i class="ph ph-minus"></i></button>
-                        <input type="number" id="qt-volume" value="1.00" step="0.01" class="w-14 h-7 bg-transparent text-center text-sm font-mono font-bold text-text-primary outline-none">
-                        <button class="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-neon-cyan" onclick="adjustVolume(0.01)"><i class="ph ph-plus"></i></button>
+            <div id="quickTradeWidget" class="absolute top-20 left-16 glass rounded-2xl shadow-panel p-4 z-30 w-56 flex flex-col gap-3 border border-border-color hidden md:flex backdrop-blur-2xl bg-black/60">
+                <div class="flex justify-between items-center border-b border-border-color pb-2">
+                    <span class="font-black text-text-primary text-base" id="qt-symbol">BTCUSDT</span>
+                    <div class="flex items-center bg-app-bg border border-border-color rounded-lg p-0.5 shadow-inner">
+                        <button class="w-6 h-6 flex items-center justify-center text-text-secondary hover:text-neon-cyan text-xs" onclick="adjustVolume(-0.01)"><i class="ph ph-minus"></i></button>
+                        <input type="number" id="qt-volume" value="1.00" step="0.01" class="w-12 h-6 bg-transparent text-center text-xs font-mono font-bold text-text-primary outline-none">
+                        <button class="w-6 h-6 flex items-center justify-center text-text-secondary hover:text-neon-cyan text-xs" onclick="adjustVolume(0.01)"><i class="ph ph-plus"></i></button>
                     </div>
                 </div>
 
-                <div class="flex gap-3 h-20">
+                <div class="flex gap-2 h-14">
                     <!-- Sell Button (Neon Magenta) -->
                     <button id="btn-sell" class="flex-1 rounded-xl bg-panel-hover border border-neon-magenta/50 hover:border-neon-magenta hover:shadow-glow-magenta hover:bg-neon-magenta/10 flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('SELL')">
-                        <span class="text-[10px] uppercase font-bold text-neon-magenta tracking-widest mb-1 transition-all">Short</span>
-                        <div class="font-mono text-sm font-black text-text-primary transition-all" id="qt-sell-price">0.00</div>
+                        <span class="text-[9px] uppercase font-bold text-neon-magenta tracking-widest transition-all">Short</span>
+                        <div class="font-mono text-xs font-black text-text-primary transition-all" id="qt-sell-price">0.00</div>
                         <div class="absolute inset-0 bg-neon-magenta/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-md" id="overlay-sell">
-                            <i class="ph ph-circle-notch animate-spin text-neon-magenta text-2xl"></i>
+                            <i class="ph ph-circle-notch animate-spin text-neon-magenta text-xl"></i>
                         </div>
                     </button>
                     
                     <!-- Buy Button (Neon Cyan) -->
                     <button id="btn-buy" class="flex-1 rounded-xl bg-panel-hover border border-neon-cyan/50 hover:border-neon-cyan hover:shadow-glow-cyan hover:bg-neon-cyan/10 flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('BUY')">
-                        <span class="text-[10px] uppercase font-bold text-neon-cyan tracking-widest mb-1 transition-all">Long</span>
-                        <div class="font-mono text-sm font-black text-text-primary transition-all" id="qt-buy-price">0.00</div>
+                        <span class="text-[9px] uppercase font-bold text-neon-cyan tracking-widest transition-all">Long</span>
+                        <div class="font-mono text-xs font-black text-text-primary transition-all" id="qt-buy-price">0.00</div>
                         <div class="absolute inset-0 bg-neon-cyan/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-md" id="overlay-buy">
-                            <i class="ph ph-circle-notch animate-spin text-neon-cyan text-2xl"></i>
+                            <i class="ph ph-circle-notch animate-spin text-neon-cyan text-xl"></i>
                         </div>
                     </button>
                 </div>
@@ -399,18 +421,16 @@
         const state = {
             account: { balance: 100000.00, equity: 100000.00, margin: 0, leverage: 100 },
             ui: {
-                activeSymbol: 'BTCUSDT', volume: 1.00, searchQuery: '', activeTab: 'positions', terminalCollapsed: false
+                activeSymbol: 'BTCUSDT', volume: 1.00, searchQuery: '', activeTab: 'positions', terminalCollapsed: false,
+                timeframe: '15m', category: 'All', activeTool: 'cursor'
             },
-            // Pre-seeded Crypto Assets with baseline prices and volatility for the simulator
+            customDrawings: [],
+            // Pre-seeded Crypto Assets with baseline prices and ZERO spread
             assets: [
-                { symbol: 'BTCUSDT', name: 'Bitcoin', type: 'Crypto', digits: 2, bid: 64230.50, ask: 64231.00, spread: 0.50, volatility: 25 },
-                { symbol: 'ETHUSDT', name: 'Ethereum', type: 'Crypto', digits: 2, bid: 3450.25, ask: 3450.50, spread: 0.25, volatility: 5 },
-                { symbol: 'SOLUSDT', name: 'Solana', type: 'Crypto', digits: 3, bid: 145.250, ask: 145.275, spread: 0.025, volatility: 0.5 },
-                { symbol: 'BNBUSDT', name: 'Binance Coin', type: 'Crypto', digits: 2, bid: 590.10, ask: 590.20, spread: 0.10, volatility: 1.5 },
-                { symbol: 'XRPUSDT', name: 'Ripple', type: 'Crypto', digits: 4, bid: 0.5240, ask: 0.5242, spread: 0.0002, volatility: 0.005 },
-                { symbol: 'DOGEUSDT', name: 'Dogecoin', type: 'Crypto', digits: 5, bid: 0.12450, ask: 0.12455, spread: 0.00005, volatility: 0.001 },
-                { symbol: 'ADAUSDT', name: 'Cardano', type: 'Crypto', digits: 4, bid: 0.4120, ask: 0.4122, spread: 0.0002, volatility: 0.004 },
-                { symbol: 'DOTUSDT', name: 'Polkadot', type: 'Crypto', digits: 3, bid: 6.240, ask: 6.245, spread: 0.005, volatility: 0.05 }
+                { symbol: 'BTCUSDT', name: 'Bitcoin', type: 'Crypto', digits: 2, bid: 96230.50, ask: 96230.50, spread: 0, volatility: 25 },
+                { symbol: 'ETHUSDT', name: 'Ethereum', type: 'Crypto', digits: 2, bid: 4450.25, ask: 4450.25, spread: 0, volatility: 5 },
+                { symbol: 'SOLUSDT', name: 'Solana', type: 'Crypto', digits: 3, bid: 245.250, ask: 245.250, spread: 0, volatility: 0.5 },
+                { symbol: 'XRPUSDT', name: 'Ripple', type: 'Crypto', digits: 4, bid: 1.5240, ask: 1.5240, spread: 0, volatility: 0.005 }
             ],
             positions: [], history: []
         };
@@ -447,63 +467,97 @@
             setTimeout(() => { toast.classList.add('translate-x-full'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
+        // --- Live API Integration ---
+        let binanceWs = null;
+
         function initLivePrices() {
             renderMarketWatch();
             updateQuickTradeWidget();
 
-            // Simulate sub-second live price feeds (Random Walk Algorithm)
+            // 1. Connect to Binance WebSocket for real-time Crypto prices
+            try {
+                binanceWs = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+                binanceWs.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    data.forEach(ticker => {
+                        const asset = state.assets.find(a => a.symbol === ticker.s && a.type === 'Crypto');
+                        if (asset) {
+                            const oldBid = asset.bid;
+                            asset.bid = parseFloat(ticker.c);
+                            asset.ask = asset.bid; // Spread is 0
+                            updateAssetUI(asset, oldBid);
+                        }
+                    });
+                };
+            } catch(e) {
+                console.warn("Binance WS stream failed, falling back to local simulation.");
+            }
+
+            // 2. Simulated Ticker for fallback for Crypto
             setInterval(() => {
                 const now = Math.floor(Date.now() / 1000);
                 
                 state.assets.forEach(asset => {
-                    const oldBid = asset.bid;
-                    // Generate a realistic micro-movement based on asset volatility
-                    const change = (Math.random() - 0.5) * asset.volatility;
-                    
-                    asset.bid = +(asset.bid + change).toFixed(asset.digits);
-                    asset.ask = +(asset.bid + asset.spread).toFixed(asset.digits);
-                    
-                    // Update specific UI element if visible
-                    const rowEl = document.getElementById(`mw-row-${asset.symbol}`);
-                    if(rowEl) {
-                        const bidEl = document.getElementById(`mw-bid-${asset.symbol}`);
-                        const askEl = document.getElementById(`mw-ask-${asset.symbol}`);
-                        const isUp = asset.bid > oldBid;
-                        const isDown = asset.bid < oldBid;
-
-                        bidEl.innerText = asset.bid.toFixed(asset.digits);
-                        askEl.innerText = asset.ask.toFixed(asset.digits);
+                    if (!binanceWs || binanceWs.readyState !== WebSocket.OPEN) {
+                        const oldBid = asset.bid;
+                        const change = (Math.random() - 0.5) * asset.volatility;
                         
-                        if(isUp || isDown) {
-                            rowEl.classList.remove('tick-up', 'tick-down');
-                            void rowEl.offsetWidth; // Reflow to restart animation
-                            rowEl.classList.add(isUp ? 'tick-up' : 'tick-down');
-                        }
-                    }
-
-                    if(asset.symbol === state.ui.activeSymbol) {
-                        updateQuickTradeWidget();
+                        asset.bid = +(asset.bid + change).toFixed(asset.digits);
+                        asset.ask = asset.bid; // Spread is 0
                         
-                        // Update live chart candle dynamically
-                        if(candleSeries && currentLiveCandle) {
-                            // Start a new 15m candle if time passed (900 seconds)
-                            if (now - currentLiveCandle.time >= 900) {
-                                currentLiveCandle = {
-                                    time: now, open: asset.bid, high: asset.bid, low: asset.bid, close: asset.bid
-                                };
-                            } else {
-                                currentLiveCandle.close = asset.bid;
-                                if(asset.bid > currentLiveCandle.high) currentLiveCandle.high = asset.bid;
-                                if(asset.bid < currentLiveCandle.low) currentLiveCandle.low = asset.bid;
-                            }
-                            candleSeries.update(currentLiveCandle);
-                        }
+                        updateAssetUI(asset, oldBid);
                     }
                 });
                 
                 if(state.positions.length > 0 && state.ui.activeTab === 'positions') renderTerminal();
                 
-            }, 750); // Tick every 750ms for realistic rapid action
+            }, 750); 
+        }
+
+        function updateAssetUI(asset, oldBid) {
+            const now = Math.floor(Date.now() / 1000);
+            
+            // Update Market Watch list UI
+            const rowEl = document.getElementById(`mw-row-${asset.symbol}`);
+            if(rowEl) {
+                const bidEl = document.getElementById(`mw-bid-${asset.symbol}`);
+                const askEl = document.getElementById(`mw-ask-${asset.symbol}`);
+                const isUp = asset.bid > oldBid;
+                const isDown = asset.bid < oldBid;
+
+                bidEl.innerText = asset.bid.toFixed(asset.digits);
+                askEl.innerText = asset.ask.toFixed(asset.digits);
+                
+                if(isUp || isDown) {
+                    rowEl.classList.remove('tick-up', 'tick-down');
+                    void rowEl.offsetWidth; 
+                    rowEl.classList.add(isUp ? 'tick-up' : 'tick-down');
+                }
+            }
+
+            // Update Quick Trade and Live Chart Candle
+            if(asset.symbol === state.ui.activeSymbol) {
+                updateQuickTradeWidget();
+                
+                if(candleSeries && currentLiveCandle) {
+                    const tfIntervals = { '1m': 60, '5m': 300, '15m': 900, '1H': 3600, '1D': 86400 };
+                    const interval = tfIntervals[state.ui.timeframe] || 900;
+                    
+                    if (now - currentLiveCandle.time >= interval) {
+                        // Create a new candle on interval boundary
+                        const candleTime = Math.floor(now / interval) * interval;
+                        currentLiveCandle = {
+                            time: candleTime, open: currentLiveCandle.close, high: currentLiveCandle.close, low: currentLiveCandle.close, close: asset.bid
+                        };
+                    } else {
+                        // Update current running candle
+                        currentLiveCandle.close = asset.bid;
+                        if(asset.bid > currentLiveCandle.high) currentLiveCandle.high = asset.bid;
+                        if(asset.bid < currentLiveCandle.low) currentLiveCandle.low = asset.bid;
+                    }
+                    candleSeries.update(currentLiveCandle);
+                }
+            }
         }
 
         async function loadChartData(symbol) {
@@ -511,38 +565,41 @@
             if(candleSeries) {
                 lwChart.removeSeries(candleSeries);
                 candleSeries = null;
+                state.customDrawings = []; 
             }
 
-            // Simulate network loading time
-            await new Promise(r => setTimeout(r, 600));
+            const asset = state.assets.find(a => a.symbol === symbol);
+            const tfIntervals = { '1m': 60, '5m': 300, '15m': 900, '1H': 3600, '1D': 86400 };
+            const interval = tfIntervals[state.ui.timeframe] || 900;
+            let formattedData = [];
 
             try {
-                const asset = state.assets.find(a => a.symbol === symbol);
-                let basePrice = asset.bid;
-                const formattedData = [];
-                
-                // Generate 300 historical 15m candles backwards from now
-                let time = Math.floor(Date.now() / 1000) - (300 * 900); 
-
-                for(let i=0; i < 300; i++) {
-                    const open = basePrice;
-                    const close = open + (Math.random() - 0.5) * asset.volatility * 4;
-                    const high = Math.max(open, close) + Math.random() * asset.volatility;
-                    const low = Math.min(open, close) - Math.random() * asset.volatility;
+                if (asset.type === 'Crypto') {
+                    // Fetch real data from Binance REST API
+                    const binanceIntervals = { '1m': '1m', '5m': '5m', '15m': '15m', '1H': '1h', '1D': '1d' };
+                    const binanceTf = binanceIntervals[state.ui.timeframe];
+                    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${binanceTf}&limit=300`);
+                    if (!res.ok) throw new Error("Binance API error");
+                    const data = await res.json();
                     
-                    formattedData.push({ time: time, open, high, low, close });
-                    basePrice = close;
-                    time += 900; 
+                    formattedData = data.map(d => ({
+                        time: d[0] / 1000,
+                        open: parseFloat(d[1]),
+                        high: parseFloat(d[2]),
+                        low: parseFloat(d[3]),
+                        close: parseFloat(d[4])
+                    }));
+                    
+                    // Sync our local state price to the latest exact Binance price
+                    asset.bid = formattedData[formattedData.length - 1].close;
+                    asset.ask = asset.bid;
                 }
 
-                // Sync current live asset price to the simulated historical close to prevent jarring jumps
                 currentLiveCandle = formattedData[formattedData.length - 1];
-                asset.bid = currentLiveCandle.close;
-                asset.ask = asset.bid + asset.spread;
 
                 candleSeries = lwChart.addCandlestickSeries({
-                    upColor: '#00F3FF',       // Neon Cyan Bullish
-                    downColor: '#FF00EA',     // Neon Magenta Bearish
+                    upColor: '#00F3FF',       
+                    downColor: '#FF00EA',     
                     borderVisible: false,
                     wickUpColor: '#00F3FF',
                     wickDownColor: '#FF00EA',
@@ -555,13 +612,12 @@
 
                 candleSeries.setData(formattedData);
                 
-                // Re-apply open position lines for this symbol
                 state.positions.forEach(pos => {
                     if(pos.symbol === state.ui.activeSymbol) drawOrderLineOnChart(pos);
                 });
 
             } catch(e) {
-                showToast("Data Error", "Failed to generate local historical data.", true);
+                showToast("Data Error", "Failed to load chart data.", true);
             } finally {
                 document.getElementById('chartLoader').style.display = 'none';
             }
@@ -590,6 +646,27 @@
                 },
                 rightPriceScale: { borderColor: 'rgba(0, 243, 255, 0.2)' },
                 timeScale: { borderColor: 'rgba(0, 243, 255, 0.2)', timeVisible: true },
+            });
+
+            // Handle Click for Drawing Tools
+            lwChart.subscribeClick(param => {
+                if (state.ui.activeTool === 'hline' && param.point && candleSeries) {
+                    const price = candleSeries.coordinateToPrice(param.point.y);
+                    if (price) {
+                        const line = candleSeries.createPriceLine({
+                            price: price,
+                            color: '#FF00EA', // Neon Magenta line
+                            lineWidth: 2,
+                            lineStyle: LightweightCharts.LineStyle.Solid,
+                            axisLabelVisible: false,
+                        });
+                        state.customDrawings.push(line);
+                        
+                        // Revert tool to cursor automatically after drawing
+                        setTool('cursor');
+                        if(audioInit) synthUI.triggerAttackRelease("C6", "32n"); 
+                    }
+                }
             });
 
             // Handle Resize
@@ -667,6 +744,53 @@
             }
         }
 
+        // --- NEW FEATURES HELPER FUNCTIONS ---
+
+        function setCategory(cat, btnElement) {
+            state.ui.category = cat;
+            const container = document.getElementById('categoryFilters');
+            Array.from(container.children).forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded text-text-secondary hover:text-neon-cyan transition-colors";
+            });
+            btnElement.className = "px-3 py-1.5 rounded bg-neon-cyan text-black transition-colors";
+            renderMarketWatch();
+        }
+
+        function setTimeframe(tf, btnElement) {
+            state.ui.timeframe = tf;
+            const container = document.getElementById('tf-selector');
+            Array.from(container.children).forEach(btn => {
+                btn.className = "px-2 py-1 text-xs font-mono rounded text-text-secondary hover:text-text-primary transition-colors";
+            });
+            btnElement.className = "px-2 py-1 text-xs font-mono rounded bg-panel-hover text-text-primary transition-colors";
+            loadChartData(state.ui.activeSymbol); // Regenerate chart with new timeframe
+        }
+
+        function setTool(tool) {
+            state.ui.activeTool = tool;
+            const btnCursor = document.getElementById('tool-cursor');
+            const btnHline = document.getElementById('tool-hline');
+            
+            const activeClass = "w-8 h-8 rounded text-neon-cyan bg-neon-cyan/10 flex items-center justify-center transition-all border border-neon-cyan/30";
+            const inactiveClass = "w-8 h-8 rounded text-text-secondary hover:text-neon-cyan hover:bg-neon-cyan/10 flex items-center justify-center transition-all border border-transparent hover:border-neon-cyan/30";
+            
+            btnCursor.className = tool === 'cursor' ? activeClass : inactiveClass;
+            btnHline.className = tool === 'hline' ? activeClass : inactiveClass;
+            
+            // Magnet crosshair for drawing accuracy
+            if (lwChart) lwChart.applyOptions({ crosshair: { mode: tool === 'hline' ? LightweightCharts.CrosshairMode.Magnet : LightweightCharts.CrosshairMode.Normal }});
+        }
+
+        function clearDrawings() {
+            if (candleSeries) {
+                state.customDrawings.forEach(line => candleSeries.removePriceLine(line));
+                state.customDrawings = [];
+            }
+            if(audioInit) synthUI.triggerAttackRelease("C4", "32n");
+        }
+
+        // --- END NEW FEATURES ---
+
         document.getElementById('marketSearch').addEventListener('input', (e) => {
             state.ui.searchQuery = e.target.value.toLowerCase();
             renderMarketWatch();
@@ -688,9 +812,11 @@
             const container = document.getElementById('marketList');
             container.innerHTML = '';
             
-            const filteredAssets = state.assets.filter(a => 
-                a.symbol.toLowerCase().includes(state.ui.searchQuery) || a.name.toLowerCase().includes(state.ui.searchQuery)
-            );
+            const filteredAssets = state.assets.filter(a => {
+                const matchesSearch = a.symbol.toLowerCase().includes(state.ui.searchQuery) || a.name.toLowerCase().includes(state.ui.searchQuery);
+                const matchesCategory = state.ui.category === 'All' || a.type === state.ui.category;
+                return matchesSearch && matchesCategory;
+            });
 
             filteredAssets.forEach(asset => {
                 const isActive = asset.symbol === state.ui.activeSymbol;
