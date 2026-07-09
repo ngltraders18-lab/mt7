@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MT7 - Advanced Web Trading Terminal</title>
+    <title>MT7 - Cyber Trading Terminal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,25 +11,25 @@
             theme: {
                 extend: {
                     colors: {
-                        'app-bg': '#030407',      
-                        'panel-bg': '#0A0E17',    
-                        'panel-hover': '#111827',
-                        'border-color': '#1F2937',
-                        'text-primary': '#F9FAFB',
-                        'text-secondary': '#9CA3AF',
-                        'accent-blue': '#2563EB', 
-                        'accent-white': '#FFFFFF', 
-                        'pnl-up': '#00E676',      
-                        'pnl-down': '#FF1744',    
+                        'app-bg': '#05050A',      
+                        'panel-bg': 'rgba(15, 15, 25, 0.65)',    
+                        'panel-hover': 'rgba(30, 30, 50, 0.8)',
+                        'border-color': 'rgba(0, 243, 255, 0.15)',
+                        'text-primary': '#FFFFFF',
+                        'text-secondary': '#8B9BB4',
+                        'neon-cyan': '#00F3FF', 
+                        'neon-magenta': '#FF00EA', 
+                        'pnl-up': '#00FF66',      
+                        'pnl-down': '#FF0055',    
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
                         mono: ['JetBrains Mono', 'Menlo', 'monospace'],
                     },
                     boxShadow: {
-                        'glow-blue': '0 0 20px rgba(37, 99, 235, 0.3)',
-                        'glow-white': '0 0 20px rgba(255, 255, 255, 0.15)',
-                        'panel': '0 8px 32px rgba(0, 0, 0, 0.8)',
+                        'glow-cyan': '0 0 15px rgba(0, 243, 255, 0.4), 0 0 30px rgba(0, 243, 255, 0.2)',
+                        'glow-magenta': '0 0 15px rgba(255, 0, 234, 0.4), 0 0 30px rgba(255, 0, 234, 0.2)',
+                        'panel': '0 8px 32px rgba(0, 0, 0, 0.9)',
                     }
                 }
             }
@@ -37,9 +37,9 @@
     </script>
 
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
     
-    <!-- Load TradingView Lightweight Charts -->
+    <!-- Load TradingView Lightweight Charts (v4 fixed) -->
     <script src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
     <!-- Load Tone.js for Synthesized Trading Sounds -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -48,8 +48,13 @@
         :root { color-scheme: dark; }
 
         body {
-            background-color: #030407;
-            color: #F9FAFB;
+            background-color: #05050A;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: center center;
+            color: #FFFFFF;
             overflow: hidden; 
             user-select: none;
             -webkit-font-smoothing: antialiased;
@@ -59,30 +64,30 @@
         /* Modern scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 243, 255, 0.5); }
 
-        /* Glassmorphism */
+        /* Cyber Glassmorphism */
         .glass {
-            background: rgba(10, 14, 23, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(31, 41, 55, 0.8);
+            background: rgba(10, 10, 18, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.02);
         }
 
         /* Desktop Grid Layout */
         .layout-grid {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 340px 1fr;
             grid-template-rows: 60px 1fr 280px;
             height: 100vh;
             width: 100vw;
             transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Class to collapse the terminal */
         .layout-grid.terminal-collapsed {
-            grid-template-rows: 60px 1fr 40px; /* 40px is just the tab header height */
+            grid-template-rows: 60px 1fr 40px; 
         }
 
         .l-header { grid-area: 1 / 1 / 2 / 3; }
@@ -90,15 +95,10 @@
         .l-chart { grid-area: 2 / 2 / 3 / 3; }
         .l-terminal { grid-area: 3 / 2 / 4 / 3; }
 
-        /* Hide elements when terminal is collapsed */
-        .terminal-collapsed .terminal-content {
-            display: none !important;
-        }
-        .terminal-collapsed .l-chart {
-            grid-area: 2 / 2 / 3 / 3; /* Expands automatically due to 1fr */
-        }
+        .terminal-collapsed .terminal-content { display: none !important; }
+        .terminal-collapsed .l-chart { grid-area: 2 / 2 / 3 / 3; }
 
-        /* Mobile Layout Modifications */
+        /* Mobile Layout */
         @media (max-width: 768px) {
             .layout-grid {
                 display: flex;
@@ -107,66 +107,55 @@
                 width: 100vw;
             }
             .l-header { flex: none; height: 60px; }
-            
-            .mobile-view-container {
-                flex: 1;
-                position: relative;
-                overflow: hidden;
-            }
-            
+            .mobile-view-container { flex: 1; position: relative; overflow: hidden; }
             .l-market, .l-chart, .l-terminal {
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-                display: none; 
-                height: 100%;
-                width: 100%;
+                position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                display: none; height: 100%; width: 100%;
             }
-
-            .view-active {
-                display: flex !important;
-                flex-direction: column;
-            }
-            
-            .l-terminal.view-active {
-                padding-bottom: 64px; /* Space for mobile nav */
-            }
-
-            #quickTradeWidget {
-                top: auto;
-                bottom: 16px;
-                left: 16px;
-                right: 16px;
-                width: auto;
-            }
+            .view-active { display: flex !important; flex-direction: column; }
+            .l-terminal.view-active { padding-bottom: 64px; }
+            #quickTradeWidget { top: auto; bottom: 16px; left: 16px; right: 16px; width: auto; }
         }
 
-        /* Animations */
-        @keyframes flashBlue { 0% { background-color: rgba(37, 99, 235, 0.3); } 100% { background-color: transparent; } }
-        @keyframes flashWhite { 0% { background-color: rgba(255, 255, 255, 0.2); } 100% { background-color: transparent; } }
-        .tick-up { animation: flashBlue 0.5s ease-out; }
-        .tick-down { animation: flashWhite 0.5s ease-out; }
+        /* Cyber Animations */
+        @keyframes flashCyan { 0% { background-color: rgba(0, 243, 255, 0.4); box-shadow: 0 0 20px rgba(0, 243, 255, 0.5); } 100% { background-color: transparent; box-shadow: none; } }
+        @keyframes flashMagenta { 0% { background-color: rgba(255, 0, 234, 0.3); box-shadow: 0 0 20px rgba(255, 0, 234, 0.4); } 100% { background-color: transparent; box-shadow: none; } }
+        .tick-up { animation: flashCyan 0.4s ease-out; }
+        .tick-down { animation: flashMagenta 0.4s ease-out; }
 
         @keyframes screenShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-2px, 2px) rotate(-1deg); }
-            40% { transform: translate(2px, -2px) rotate(1deg); }
-            60% { transform: translate(-2px, -2px) rotate(0deg); }
-            80% { transform: translate(2px, 2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 3px) rotate(-1deg); }
+            40% { transform: translate(3px, -3px) rotate(1deg); }
+            60% { transform: translate(-3px, -3px) rotate(0deg); }
+            80% { transform: translate(3px, 3px) rotate(-1deg); }
         }
-        .shake-screen { animation: screenShake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+        .shake-screen { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-        @keyframes screenFlashBlue { 0% { box-shadow: inset 0 0 100px rgba(37, 99, 235, 0.4); background-color: rgba(37, 99, 235, 0.05); } 100% { box-shadow: inset 0 0 0px transparent; background-color: transparent; } }
-        @keyframes screenFlashWhite { 0% { box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.2); background-color: rgba(255, 255, 255, 0.03); } 100% { box-shadow: inset 0 0 0px transparent; background-color: transparent; } }
-        .flash-buy { animation: screenFlashBlue 0.4s ease-out; }
-        .flash-sell { animation: screenFlashWhite 0.4s ease-out; }
+        @keyframes screenFlashCyan { 0% { box-shadow: inset 0 0 150px rgba(0, 243, 255, 0.4); background-color: rgba(0, 243, 255, 0.05); } 100% { box-shadow: inset 0 0 0px transparent; background-color: transparent; } }
+        @keyframes screenFlashMagenta { 0% { box-shadow: inset 0 0 150px rgba(255, 0, 234, 0.3); background-color: rgba(255, 0, 234, 0.03); } 100% { box-shadow: inset 0 0 0px transparent; background-color: transparent; } }
+        .flash-buy { animation: screenFlashCyan 0.5s ease-out; }
+        .flash-sell { animation: screenFlashMagenta 0.5s ease-out; }
+
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(90deg, #00F3FF, #FF00EA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
         input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none; margin: 0;
-        }
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         
-        .tv-lightweight-charts {
-            font-family: 'JetBrains Mono', monospace !important;
+        /* Remove default blue outline on focus */
+        *:focus { outline: none !important; }
+
+        /* Initial loader for chart */
+        .chart-loader {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
     </style>
 </head>
@@ -175,114 +164,124 @@
     <div class="layout-grid" id="main-layout">
 
         <!-- Top Header Navigation -->
-        <header class="l-header glass border-b border-border-color flex items-center justify-between px-4 z-20 shrink-0">
+        <header class="l-header glass border-b border-border-color flex items-center justify-between px-4 z-20 shrink-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
             <div class="flex items-center gap-4">
-                <!-- Logo -->
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-accent-blue flex items-center justify-center shadow-glow-blue">
-                        <i class="ph-bold ph-hexagon text-white text-xl"></i>
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-cyan to-blue-600 flex items-center justify-center shadow-glow-cyan relative overflow-hidden">
+                        <div class="absolute inset-0 bg-white/20 blur-md"></div>
+                        <i class="ph-bold ph-hexagon text-white text-2xl relative z-10"></i>
                     </div>
                     <div class="flex flex-col hidden sm:flex">
-                        <span class="font-bold text-lg tracking-wider text-text-primary leading-none">MT7<span class="text-accent-blue">.</span></span>
+                        <span class="font-black text-xl tracking-widest text-text-primary leading-none uppercase">MT7<span class="text-gradient">.CYBER</span></span>
+                        <span class="text-[9px] text-neon-cyan tracking-[0.2em] uppercase font-mono">Live Data Node</span>
                     </div>
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3 bg-app-bg border border-border-color rounded-lg px-3 py-1.5">
+                <div class="flex items-center gap-3 bg-panel-bg border border-border-color rounded-lg px-4 py-2 shadow-inner">
                     <div class="flex items-center gap-2 border-r border-border-color pr-3 hidden sm:flex">
                         <div class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-blue opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-accent-blue"></span>
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-neon-cyan"></span>
                         </div>
-                        <span class="text-[10px] text-text-secondary font-medium tracking-widest uppercase">Live</span>
+                        <span class="text-[10px] text-neon-cyan font-bold tracking-widest uppercase">Connected</span>
                     </div>
-                    <div class="font-mono font-bold text-text-primary text-sm sm:text-base tracking-tight" id="headerBalance">$0.00</div>
+                    <div class="font-mono font-black text-text-primary text-sm sm:text-base tracking-tight" id="headerBalance">$0.00</div>
                 </div>
                 
-                <!-- Profile Avatar Button -->
-                <div class="w-8 h-8 rounded-full bg-panel-hover border border-border-color flex items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-accent-blue hover:shadow-glow-blue" onclick="toggleProfileModal()">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Trader&backgroundColor=111827" alt="User" class="w-full h-full">
+                <div class="w-10 h-10 rounded-xl bg-panel-hover border border-border-color flex items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-neon-cyan hover:shadow-glow-cyan" onclick="toggleProfileModal()">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Cyber&backgroundColor=05050A" alt="User" class="w-full h-full opacity-90">
                 </div>
             </div>
         </header>
 
         <!-- Market Watch Panel -->
-        <section id="view-market" class="l-market glass border-r border-border-color flex flex-col z-10 md:view-active">
-            <div class="p-3 border-b border-border-color flex flex-col gap-3 bg-panel-bg">
+        <section id="view-market" class="l-market glass border-r border-border-color flex flex-col z-10 md:view-active relative">
+            <div class="absolute inset-0 bg-gradient-to-b from-neon-cyan/5 to-transparent pointer-events-none"></div>
+            
+            <div class="p-4 border-b border-border-color flex flex-col gap-4 bg-panel-bg relative z-10">
                 <div class="relative">
-                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary"></i>
-                    <input type="text" id="marketSearch" placeholder="Search markets..." class="w-full bg-app-bg border border-border-color rounded-md py-2 pl-9 pr-3 text-sm text-text-primary focus:outline-none focus:border-accent-blue focus:shadow-glow-blue transition-all">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-neon-cyan"></i>
+                    <input type="text" id="marketSearch" placeholder="Search markets..." class="w-full bg-app-bg border border-border-color rounded-lg py-2.5 pl-10 pr-3 text-sm text-text-primary focus:border-neon-cyan focus:shadow-glow-cyan transition-all placeholder-text-secondary/50">
                 </div>
-                <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs" id="categoryFilters">
-                    <button class="px-3 py-1 rounded bg-accent-blue text-white" onclick="setCategory('All', this)">All</button>
-                    <button class="px-3 py-1 rounded bg-panel-hover text-text-secondary hover:text-white transition-colors" onclick="setCategory('Forex', this)">Forex</button>
-                    <button class="px-3 py-1 rounded bg-panel-hover text-text-secondary hover:text-white transition-colors" onclick="setCategory('Crypto', this)">Crypto</button>
-                    <button class="px-3 py-1 rounded bg-panel-hover text-text-secondary hover:text-white transition-colors" onclick="setCategory('Indices', this)">Indices</button>
+                <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs font-mono font-bold uppercase tracking-wider" id="categoryFilters">
+                    <button class="px-3 py-1.5 rounded bg-neon-cyan text-black" onclick="setCategory('All', this)">Crypto</button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 px-3 py-2 border-b border-border-color text-[10px] uppercase tracking-wider font-bold text-text-secondary bg-app-bg">
-                <div class="col-span-2">Symbol</div>
+            <div class="grid grid-cols-4 px-4 py-2 border-b border-border-color text-[10px] uppercase tracking-[0.1em] font-bold text-text-secondary bg-app-bg/80 backdrop-blur">
+                <div class="col-span-2">Asset / Vol</div>
                 <div class="text-right">Bid</div>
                 <div class="text-right">Ask</div>
             </div>
 
-            <div class="flex-1 overflow-y-auto no-scrollbar pb-16 md:pb-0" id="marketList">
-                <!-- Populated via JS -->
+            <div class="flex-1 overflow-y-auto no-scrollbar pb-16 md:pb-0 relative z-10" id="marketList">
+                <div class="p-8 text-center text-neon-cyan text-xs font-mono flex flex-col items-center gap-2">
+                    <i class="ph ph-spinner-gap animate-spin text-2xl"></i>
+                    Connecting to Binance Live Stream...
+                </div>
             </div>
         </section>
 
         <!-- Main Charting Area -->
         <main id="view-chart" class="l-chart bg-app-bg flex flex-col relative view-active md:view-active">
             
-            <!-- Top Toolbar for Chart -->
-            <div class="h-12 border-b border-border-color flex items-center justify-between px-3 glass absolute top-0 left-0 right-0 z-10">
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-text-primary text-base tracking-wide" id="chartTitle">EURUSD</span>
-                    <div class="h-4 w-px bg-border-color"></div>
-                    <span class="text-xs text-text-secondary" id="chartDesc">Euro / US Dollar</span>
+            <div class="h-14 border-b border-border-color flex items-center justify-between px-4 glass absolute top-0 left-0 right-0 z-10">
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col">
+                        <span class="font-black text-text-primary text-lg tracking-wide flex items-center gap-2" id="chartTitle">
+                            BTCUSDT <span class="flex h-2 w-2 rounded-full bg-neon-cyan animate-pulse"></span>
+                        </span>
+                        <span class="text-[10px] text-neon-cyan font-mono uppercase tracking-widest" id="chartDesc">Binance Spot</span>
+                    </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <button class="px-3 py-1.5 rounded-md border border-border-color bg-app-bg hover:bg-panel-hover text-text-primary text-xs font-medium transition-all shadow-sm flex items-center gap-1" onclick="toggleTradeWidget()">
-                        <i class="ph-fill ph-lightning text-accent-blue"></i> Trade
+                <div class="flex items-center gap-3">
+                    <div class="bg-panel-bg border border-border-color rounded-lg p-1 hidden sm:flex">
+                        <button class="px-2 py-1 text-xs font-mono rounded bg-panel-hover text-text-primary">15m</button>
+                    </div>
+                    <button class="px-4 py-2 rounded-lg bg-neon-cyan/10 border border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-black hover:shadow-glow-cyan text-xs font-bold transition-all shadow-sm flex items-center gap-2 uppercase tracking-wide" onclick="toggleTradeWidget()">
+                        <i class="ph-fill ph-target"></i> Execute
                     </button>
                 </div>
             </div>
 
-            <!-- Lightweight Chart Container -->
-            <div class="flex-1 w-full h-full pt-12 relative" id="tv_chart_container">
-                <!-- Canvas injected by Lightweight Charts -->
+            <!-- Chart Container -->
+            <div class="flex-1 w-full h-full pt-14 relative bg-[#05050A]" id="tv_chart_container">
+                <div class="chart-loader" id="chartLoader">
+                    <i class="ph ph-circle-notch animate-spin text-3xl text-neon-cyan"></i>
+                    <span class="text-xs font-mono text-neon-cyan tracking-widest uppercase">Syncing Node Data...</span>
+                </div>
             </div>
 
-            <!-- Quick Trade Widget HUD -->
-            <div id="quickTradeWidget" class="absolute top-16 left-4 glass rounded-xl shadow-panel p-4 z-30 w-64 flex flex-col gap-4 border border-border-color hidden md:flex">
-                <div class="flex justify-between items-center border-b border-border-color pb-2">
-                    <span class="font-bold text-text-primary" id="qt-symbol">EURUSD</span>
-                    <div class="flex items-center bg-app-bg border border-border-color rounded-md p-0.5">
-                        <button class="w-6 h-6 flex items-center justify-center text-text-secondary hover:text-white" onclick="adjustVolume(-0.01)"><i class="ph ph-minus"></i></button>
-                        <input type="number" id="qt-volume" value="1.00" step="0.01" class="w-12 h-6 bg-transparent text-center text-xs font-mono font-bold text-text-primary outline-none">
-                        <button class="w-6 h-6 flex items-center justify-center text-text-secondary hover:text-white" onclick="adjustVolume(0.01)"><i class="ph ph-plus"></i></button>
+            <!-- Cyber Quick Trade Widget HUD -->
+            <div id="quickTradeWidget" class="absolute top-20 left-4 glass rounded-2xl shadow-panel p-5 z-30 w-72 flex flex-col gap-5 border border-border-color hidden md:flex backdrop-blur-2xl bg-black/60">
+                <div class="flex justify-between items-center border-b border-border-color pb-3">
+                    <span class="font-black text-text-primary text-lg" id="qt-symbol">BTCUSDT</span>
+                    <div class="flex items-center bg-app-bg border border-border-color rounded-lg p-1 shadow-inner">
+                        <button class="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-neon-cyan" onclick="adjustVolume(-0.01)"><i class="ph ph-minus"></i></button>
+                        <input type="number" id="qt-volume" value="1.00" step="0.01" class="w-14 h-7 bg-transparent text-center text-sm font-mono font-bold text-text-primary outline-none">
+                        <button class="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-neon-cyan" onclick="adjustVolume(0.01)"><i class="ph ph-plus"></i></button>
                     </div>
                 </div>
 
-                <div class="flex gap-2 h-16">
-                    <!-- Sell Button (White/Bearish) -->
-                    <button id="btn-sell" class="flex-1 rounded-lg bg-panel-hover border border-text-secondary hover:border-white hover:shadow-glow-white flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('SELL')">
-                        <span class="text-[10px] uppercase font-bold text-text-secondary group-hover:text-white mb-0.5 transition-all">Sell</span>
-                        <div class="font-mono text-sm font-bold text-text-primary group-hover:text-white transition-all" id="qt-sell-price">0.0000</div>
-                        <div class="absolute inset-0 bg-white/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-sm" id="overlay-sell">
-                            <i class="ph ph-spinner-gap animate-spin text-white text-xl"></i>
+                <div class="flex gap-3 h-20">
+                    <!-- Sell Button (Neon Magenta) -->
+                    <button id="btn-sell" class="flex-1 rounded-xl bg-panel-hover border border-neon-magenta/50 hover:border-neon-magenta hover:shadow-glow-magenta hover:bg-neon-magenta/10 flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('SELL')">
+                        <span class="text-[10px] uppercase font-bold text-neon-magenta tracking-widest mb-1 transition-all">Short</span>
+                        <div class="font-mono text-sm font-black text-text-primary transition-all" id="qt-sell-price">0.00</div>
+                        <div class="absolute inset-0 bg-neon-magenta/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-md" id="overlay-sell">
+                            <i class="ph ph-circle-notch animate-spin text-neon-magenta text-2xl"></i>
                         </div>
                     </button>
                     
-                    <!-- Buy Button (Blue/Bullish) -->
-                    <button id="btn-buy" class="flex-1 rounded-lg bg-panel-hover border border-accent-blue/50 hover:border-accent-blue hover:shadow-glow-blue flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('BUY')">
-                        <span class="text-[10px] uppercase font-bold text-accent-blue/80 group-hover:text-accent-blue mb-0.5 transition-all">Buy</span>
-                        <div class="font-mono text-sm font-bold text-text-primary group-hover:text-white transition-all" id="qt-buy-price">0.0000</div>
-                        <div class="absolute inset-0 bg-accent-blue/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-sm" id="overlay-buy">
-                            <i class="ph ph-spinner-gap animate-spin text-accent-blue text-xl"></i>
+                    <!-- Buy Button (Neon Cyan) -->
+                    <button id="btn-buy" class="flex-1 rounded-xl bg-panel-hover border border-neon-cyan/50 hover:border-neon-cyan hover:shadow-glow-cyan hover:bg-neon-cyan/10 flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('BUY')">
+                        <span class="text-[10px] uppercase font-bold text-neon-cyan tracking-widest mb-1 transition-all">Long</span>
+                        <div class="font-mono text-sm font-black text-text-primary transition-all" id="qt-buy-price">0.00</div>
+                        <div class="absolute inset-0 bg-neon-cyan/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-md" id="overlay-buy">
+                            <i class="ph ph-circle-notch animate-spin text-neon-cyan text-2xl"></i>
                         </div>
                     </button>
                 </div>
@@ -292,160 +291,134 @@
         <!-- Bottom Trade Terminal -->
         <section id="view-portfolio" class="l-terminal glass border-t border-border-color flex flex-col z-10 hidden md:flex relative overflow-hidden">
             
-            <!-- Terminal Header & Tabs -->
-            <div class="flex justify-between items-center border-b border-border-color bg-panel-bg w-full">
-                <div class="flex px-2">
-                    <button class="px-5 py-2 text-xs font-semibold text-accent-blue border-b-2 border-accent-blue transition-all" id="tab-positions" onclick="setTerminalTab('positions')">Open Positions</button>
-                    <button class="px-5 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all" id="tab-history" onclick="setTerminalTab('history')">History</button>
+            <div class="flex justify-between items-center border-b border-border-color bg-panel-bg w-full h-10">
+                <div class="flex px-2 h-full">
+                    <button class="px-6 h-full text-xs font-bold text-neon-cyan border-b-2 border-neon-cyan transition-all uppercase tracking-wider" id="tab-positions" onclick="setTerminalTab('positions')">Open Positions</button>
+                    <button class="px-6 h-full text-xs font-bold text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all uppercase tracking-wider" id="tab-history" onclick="setTerminalTab('history')">System History</button>
                 </div>
-                <!-- Collapse Toggle Button -->
-                <button class="px-4 py-2 text-text-secondary hover:text-white transition-colors h-full flex items-center border-l border-border-color hidden md:flex" onclick="toggleTerminal()" title="Toggle Terminal">
+                <button class="px-4 h-full text-text-secondary hover:text-neon-cyan transition-colors border-l border-border-color hidden md:flex items-center justify-center bg-app-bg" onclick="toggleTerminal()" title="Toggle Terminal">
                     <i class="ph ph-caret-down transition-transform duration-300" id="terminalToggleIcon"></i>
                 </button>
             </div>
 
-            <!-- Terminal Content (Hidden when collapsed) -->
             <div class="terminal-content flex flex-col flex-1 overflow-hidden">
-                <!-- Table Header -->
                 <div class="grid grid-cols-10 gap-2 px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-text-secondary border-b border-border-color bg-app-bg shrink-0" id="terminalHeader">
-                    <!-- Dynamically populated -->
+                    <!-- Populated by JS -->
                 </div>
 
-                <!-- Data List -->
                 <div class="flex-1 overflow-y-auto no-scrollbar" id="terminalList">
-                    <!-- Populated via JS -->
+                    <!-- Populated by JS -->
                 </div>
 
-                <!-- Account Summary Footer -->
-                <div class="h-10 border-t border-border-color bg-panel-bg px-4 flex justify-between items-center text-xs font-mono shrink-0">
+                <div class="h-12 border-t border-border-color bg-panel-bg px-4 flex justify-between items-center text-xs font-mono shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
                     <div class="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar">
-                        <div class="flex gap-2">
-                            <span class="text-text-secondary">Balance:</span>
-                            <span class="text-text-primary font-bold" id="ft-balance">0.00</span>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-text-secondary text-[10px] uppercase">Balance</span>
+                            <span class="text-text-primary font-bold text-sm" id="ft-balance">0.00</span>
                         </div>
-                        <div class="flex gap-2">
-                            <span class="text-text-secondary">Equity:</span>
-                            <span class="text-text-primary font-bold" id="ft-equity">0.00</span>
+                        <div class="flex gap-2 items-center">
+                            <span class="text-text-secondary text-[10px] uppercase">Equity</span>
+                            <span class="text-text-primary font-bold text-sm" id="ft-equity">0.00</span>
                         </div>
-                        <div class="flex gap-2 hidden sm:flex">
-                            <span class="text-text-secondary">Margin:</span>
+                        <div class="flex gap-2 items-center hidden sm:flex">
+                            <span class="text-text-secondary text-[10px] uppercase">Margin</span>
                             <span class="text-text-primary" id="ft-margin">0.00</span>
                         </div>
-                        <div class="flex gap-2 hidden md:flex">
-                            <span class="text-text-secondary">Free:</span>
-                            <span class="text-text-primary" id="ft-free">0.00</span>
-                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-text-secondary text-[10px] uppercase">PnL:</span>
-                        <span class="font-bold text-sm" id="ft-pnl">0.00</span>
+                    <div class="flex items-center gap-3 bg-app-bg px-3 py-1.5 rounded border border-border-color">
+                        <span class="text-text-secondary text-[10px] uppercase tracking-widest">Global PnL</span>
+                        <span class="font-black text-sm" id="ft-pnl">0.00</span>
                     </div>
                 </div>
             </div>
         </section>
-
     </div>
 
     <!-- Mobile Navigation -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-panel-bg border-t border-border-color flex justify-around items-center z-50">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 glass border-t border-border-color flex justify-around items-center z-50 bg-black/80 backdrop-blur-xl">
         <button class="flex flex-col items-center gap-1 text-text-secondary w-full py-2 nav-btn" onclick="switchMobileView('view-market', this)">
             <i class="ph ph-list-dashes text-2xl"></i>
-            <span class="text-[10px]">Market</span>
+            <span class="text-[9px] uppercase tracking-wider font-bold">Market</span>
         </button>
-        <button class="flex flex-col items-center gap-1 text-accent-blue w-full py-2 nav-btn" onclick="switchMobileView('view-chart', this)">
-            <i class="ph-fill ph-chart-bar text-2xl"></i>
-            <span class="text-[10px]">Chart</span>
+        <button class="flex flex-col items-center gap-1 text-neon-cyan w-full py-2 nav-btn" onclick="switchMobileView('view-chart', this)">
+            <i class="ph-fill ph-chart-line-up text-2xl"></i>
+            <span class="text-[9px] uppercase tracking-wider font-bold">Chart</span>
         </button>
         <button class="flex flex-col items-center gap-1 text-text-secondary w-full py-2 nav-btn relative" onclick="switchMobileView('view-portfolio', this)">
             <i class="ph ph-briefcase text-2xl"></i>
-            <span class="text-[10px]">Portfolio</span>
-            <span id="mobile-badge" class="absolute top-1 right-8 w-2 h-2 bg-accent-blue rounded-full hidden"></span>
+            <span class="text-[9px] uppercase tracking-wider font-bold">Portfolio</span>
+            <span id="mobile-badge" class="absolute top-1 right-8 w-2 h-2 bg-neon-magenta rounded-full shadow-glow-magenta hidden"></span>
         </button>
     </nav>
 
-    <!-- Profile Modal (Hidden by default) -->
-    <div id="profileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-300 p-4">
-        <div class="bg-panel-bg border border-border-color rounded-2xl shadow-glow-blue w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300" id="profileContent">
+    <!-- Cyber Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+        <div class="glass border border-neon-cyan/30 rounded-2xl shadow-glow-cyan w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 relative" id="profileContent">
             
-            <div class="p-6 flex flex-col items-center relative border-b border-border-color">
-                <button class="absolute top-4 right-4 text-text-secondary hover:text-white" onclick="toggleProfileModal()">
-                    <i class="ph ph-x text-xl"></i>
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-cyan to-neon-magenta"></div>
+
+            <div class="p-8 flex flex-col items-center relative border-b border-border-color bg-panel-bg">
+                <button class="absolute top-4 right-4 text-text-secondary hover:text-neon-cyan transition-colors" onclick="toggleProfileModal()">
+                    <i class="ph ph-x text-2xl"></i>
                 </button>
-                <div class="w-20 h-20 rounded-full border-2 border-accent-blue shadow-glow-blue overflow-hidden mb-4 relative">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Trader&backgroundColor=111827" alt="User" class="w-full h-full">
+                <div class="w-24 h-24 rounded-2xl bg-black border border-neon-cyan shadow-glow-cyan overflow-hidden mb-4 relative p-1">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Cyber&backgroundColor=05050A" alt="User" class="w-full h-full rounded-xl">
                 </div>
-                <h2 class="text-xl font-bold text-text-primary">Alex Mercer</h2>
-                <p class="text-sm text-accent-blue font-mono mt-1">PRO-TRADER-992</p>
+                <h2 class="text-2xl font-black text-text-primary tracking-wide">NEO_TRADER</h2>
+                <p class="text-xs text-neon-magenta font-mono mt-1 uppercase tracking-widest">System Admin</p>
                 
-                <div class="flex gap-2 mt-4">
-                    <span class="px-2 py-1 bg-green-500/10 text-green-400 text-[10px] rounded border border-green-500/20 uppercase tracking-wide">Verified</span>
-                    <span class="px-2 py-1 bg-blue-500/10 text-accent-blue text-[10px] rounded border border-blue-500/20 uppercase tracking-wide">1:100 Leverage</span>
+                <div class="flex gap-3 mt-5">
+                    <span class="px-3 py-1 bg-neon-cyan/10 text-neon-cyan text-[10px] rounded border border-neon-cyan/30 uppercase font-bold tracking-widest">Verified</span>
+                    <span class="px-3 py-1 bg-neon-magenta/10 text-neon-magenta text-[10px] rounded border border-neon-magenta/30 uppercase font-bold tracking-widest">1:100 Leverage</span>
                 </div>
             </div>
 
-            <div class="p-6 bg-app-bg/50">
+            <div class="p-6 bg-app-bg">
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-panel-hover p-3 rounded-lg border border-border-color flex flex-col">
-                        <span class="text-text-secondary text-[10px] uppercase">Server</span>
-                        <span class="text-text-primary font-mono text-sm">MT7-Live-NY4</span>
+                    <div class="bg-panel-hover p-4 rounded-xl border border-border-color flex flex-col items-center text-center">
+                        <span class="text-text-secondary text-[10px] uppercase tracking-widest mb-1">Data Stream</span>
+                        <span class="text-neon-cyan font-mono text-sm font-bold">Binance API</span>
                     </div>
-                    <div class="bg-panel-hover p-3 rounded-lg border border-border-color flex flex-col">
-                        <span class="text-text-secondary text-[10px] uppercase">Win Rate</span>
-                        <span class="text-text-primary font-mono text-sm">68.4%</span>
+                    <div class="bg-panel-hover p-4 rounded-xl border border-border-color flex flex-col items-center text-center">
+                        <span class="text-text-secondary text-[10px] uppercase tracking-widest mb-1">Latency</span>
+                        <span class="text-pnl-up font-mono text-sm font-bold flex items-center gap-1"><i class="ph-fill ph-wifi-high"></i> 12ms</span>
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <button class="w-full py-2.5 rounded bg-panel-hover border border-border-color text-text-primary hover:bg-border-color transition-colors flex items-center justify-center gap-2">
-                        <i class="ph ph-gear"></i> Account Settings
-                    </button>
-                    <button class="w-full py-2.5 rounded bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2" onclick="toggleProfileModal()">
-                        <i class="ph ph-sign-out"></i> Secure Logout
-                    </button>
-                </div>
+                <button class="w-full py-3 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan hover:text-black hover:shadow-glow-cyan transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs" onclick="toggleProfileModal()">
+                    <i class="ph-fill ph-power"></i> Disconnect Node
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Notification Toast Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none w-72"></div>
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-3 pointer-events-none w-80"></div>
 
     <script>
-        // --- STREAMING_CHUNK: State Management and Audio Setup ---
         const state = {
-            account: {
-                balance: 50000.00,
-                equity: 50000.00,
-                margin: 0,
-                leverage: 100
-            },
+            account: { balance: 100000.00, equity: 100000.00, margin: 0, leverage: 100 },
             ui: {
-                activeSymbol: 'EURUSD',
-                volume: 1.00,
-                searchQuery: '',
-                categoryFilter: 'All',
-                activeTab: 'positions',
-                terminalCollapsed: false
+                activeSymbol: 'BTCUSDT', volume: 1.00, searchQuery: '', activeTab: 'positions', terminalCollapsed: false
             },
+            // Pre-seeded Crypto Assets with baseline prices and volatility for the simulator
             assets: [
-                { symbol: 'EURUSD', name: 'Euro / US Dollar', type: 'Forex', bid: 1.09452, ask: 1.09465, spread: 1.3, digits: 5 },
-                { symbol: 'GBPUSD', name: 'Pound / US Dollar', type: 'Forex', bid: 1.28450, ask: 1.28468, spread: 1.8, digits: 5 },
-                { symbol: 'USDJPY', name: 'US Dollar / Yen', type: 'Forex', bid: 156.321, ask: 156.335, spread: 1.4, digits: 3 },
-                { symbol: 'XAUUSD', name: 'Gold / US Dollar', type: 'Forex', bid: 2345.50, ask: 2345.85, spread: 3.5, digits: 2 },
-                { symbol: 'BTCUSD', name: 'Bitcoin / US Dollar', type: 'Crypto', bid: 64230.00, ask: 64245.00, spread: 15, digits: 2 },
-                { symbol: 'ETHUSD', name: 'Ethereum / US Dollar', type: 'Crypto', bid: 3450.20, ask: 3452.00, spread: 1.8, digits: 2 },
-                { symbol: 'SPX500', name: 'S&P 500 Index', type: 'Indices', bid: 5240.2, ask: 5241.5, spread: 1.3, digits: 1 },
-                { symbol: 'NDX100', name: 'Nasdaq 100', type: 'Indices', bid: 18450.5, ask: 18452.0, spread: 1.5, digits: 1 },
+                { symbol: 'BTCUSDT', name: 'Bitcoin', type: 'Crypto', digits: 2, bid: 64230.50, ask: 64231.00, spread: 0.50, volatility: 25 },
+                { symbol: 'ETHUSDT', name: 'Ethereum', type: 'Crypto', digits: 2, bid: 3450.25, ask: 3450.50, spread: 0.25, volatility: 5 },
+                { symbol: 'SOLUSDT', name: 'Solana', type: 'Crypto', digits: 3, bid: 145.250, ask: 145.275, spread: 0.025, volatility: 0.5 },
+                { symbol: 'BNBUSDT', name: 'Binance Coin', type: 'Crypto', digits: 2, bid: 590.10, ask: 590.20, spread: 0.10, volatility: 1.5 },
+                { symbol: 'XRPUSDT', name: 'Ripple', type: 'Crypto', digits: 4, bid: 0.5240, ask: 0.5242, spread: 0.0002, volatility: 0.005 },
+                { symbol: 'DOGEUSDT', name: 'Dogecoin', type: 'Crypto', digits: 5, bid: 0.12450, ask: 0.12455, spread: 0.00005, volatility: 0.001 },
+                { symbol: 'ADAUSDT', name: 'Cardano', type: 'Crypto', digits: 4, bid: 0.4120, ask: 0.4122, spread: 0.0002, volatility: 0.004 },
+                { symbol: 'DOTUSDT', name: 'Polkadot', type: 'Crypto', digits: 3, bid: 6.240, ask: 6.245, spread: 0.005, volatility: 0.05 }
             ],
-            positions: [], // Active trades { ticket, ..., priceLineRef }
-            history: []
+            positions: [], history: []
         };
 
-        let lwChart = null;
-        let candleSeries = null;
-        let chartDataBuffer = {}; // Store historical dummy data per symbol
+        let lwChart = null, candleSeries = null;
+        let currentLiveCandle = null; // Track current candle for live chart updates
 
-        // Audio Engine
+        // Audio Setup
         let audioInit = false;
         const synthUI = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.0, release: 0.1 } }).toDestination(); synthUI.volume.value = -20;
         const synthSuccess = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 0.05, decay: 0.2, sustain: 0.2, release: 1 } }).toDestination(); synthSuccess.volume.value = -12;
@@ -457,99 +430,166 @@
         document.body.addEventListener('click', initAudio, { once: true });
         document.body.addEventListener('touchstart', initAudio, { once: true });
 
-        function triggerVibration(pattern) {
-            if (typeof navigator.vibrate === 'function') navigator.vibrate(pattern);
-        }
+        function triggerVibration(pattern) { if (typeof navigator.vibrate === 'function') navigator.vibrate(pattern); }
         const formatMoney = (amount) => amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
         
-        function showToast(title, message) {
+        function showToast(title, message, isError = false) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.className = `glass border border-border-color rounded-lg p-3 flex flex-col transform translate-x-full transition-all duration-300 pointer-events-auto shadow-panel`;
-            toast.innerHTML = `<div class="flex justify-between items-center mb-1"><span class="font-bold text-text-primary text-xs">${title}</span><i class="ph ph-x text-text-secondary cursor-pointer hover:text-white" onclick="this.parentElement.parentElement.remove()"></i></div><span class="text-text-secondary text-xs">${message}</span>`;
+            const colorClass = isError ? 'border-neon-magenta shadow-glow-magenta' : 'border-neon-cyan shadow-glow-cyan';
+            const iconClass = isError ? 'text-neon-magenta' : 'text-neon-cyan';
+            
+            toast.className = `glass border ${colorClass} rounded-xl p-4 flex flex-col transform translate-x-full transition-all duration-300 pointer-events-auto bg-black/80 backdrop-blur-xl`;
+            toast.innerHTML = `<div class="flex justify-between items-center mb-1"><span class="font-black text-text-primary text-xs uppercase tracking-wider flex items-center gap-2"><i class="ph-fill ph-bell-ringing ${iconClass}"></i> ${title}</span><i class="ph ph-x text-text-secondary cursor-pointer hover:text-white" onclick="this.parentElement.parentElement.remove()"></i></div><span class="text-text-secondary text-xs font-mono">${message}</span>`;
+            
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-x-full'), 10);
-            setTimeout(() => { toast.classList.add('translate-x-full'); setTimeout(() => toast.remove(), 300); }, 3000);
+            setTimeout(() => { toast.classList.add('translate-x-full'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
-        // --- STREAMING_CHUNK: TradingView Lightweight Charts Initialization ---
-        function generateHistoricalData(asset) {
-            if(chartDataBuffer[asset.symbol]) return chartDataBuffer[asset.symbol];
-            
-            let data = [];
-            let time = Math.floor(Date.now() / 1000) - 200 * 15 * 60; // 200 candles ago, 15m
-            let o = asset.bid;
-            const volatility = asset.digits <= 3 ? (asset.symbol === 'BTCUSD' ? 50 : 0.2) : 0.002;
+        function initLivePrices() {
+            renderMarketWatch();
+            updateQuickTradeWidget();
 
-            for(let i=0; i<200; i++) {
-                let c = o + (Math.random()-0.5)*volatility;
-                let h = Math.max(o, c) + Math.random()*(volatility/2);
-                let l = Math.min(o, c) - Math.random()*(volatility/2);
-                // align to 15m boundaries roughly
-                time -= time % (15*60);
-                data.push({ time: time, open: o, high: h, low: l, close: c });
-                o = c;
-                time += 15 * 60;
+            // Simulate sub-second live price feeds (Random Walk Algorithm)
+            setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                
+                state.assets.forEach(asset => {
+                    const oldBid = asset.bid;
+                    // Generate a realistic micro-movement based on asset volatility
+                    const change = (Math.random() - 0.5) * asset.volatility;
+                    
+                    asset.bid = +(asset.bid + change).toFixed(asset.digits);
+                    asset.ask = +(asset.bid + asset.spread).toFixed(asset.digits);
+                    
+                    // Update specific UI element if visible
+                    const rowEl = document.getElementById(`mw-row-${asset.symbol}`);
+                    if(rowEl) {
+                        const bidEl = document.getElementById(`mw-bid-${asset.symbol}`);
+                        const askEl = document.getElementById(`mw-ask-${asset.symbol}`);
+                        const isUp = asset.bid > oldBid;
+                        const isDown = asset.bid < oldBid;
+
+                        bidEl.innerText = asset.bid.toFixed(asset.digits);
+                        askEl.innerText = asset.ask.toFixed(asset.digits);
+                        
+                        if(isUp || isDown) {
+                            rowEl.classList.remove('tick-up', 'tick-down');
+                            void rowEl.offsetWidth; // Reflow to restart animation
+                            rowEl.classList.add(isUp ? 'tick-up' : 'tick-down');
+                        }
+                    }
+
+                    if(asset.symbol === state.ui.activeSymbol) {
+                        updateQuickTradeWidget();
+                        
+                        // Update live chart candle dynamically
+                        if(candleSeries && currentLiveCandle) {
+                            // Start a new 15m candle if time passed (900 seconds)
+                            if (now - currentLiveCandle.time >= 900) {
+                                currentLiveCandle = {
+                                    time: now, open: asset.bid, high: asset.bid, low: asset.bid, close: asset.bid
+                                };
+                            } else {
+                                currentLiveCandle.close = asset.bid;
+                                if(asset.bid > currentLiveCandle.high) currentLiveCandle.high = asset.bid;
+                                if(asset.bid < currentLiveCandle.low) currentLiveCandle.low = asset.bid;
+                            }
+                            candleSeries.update(currentLiveCandle);
+                        }
+                    }
+                });
+                
+                if(state.positions.length > 0 && state.ui.activeTab === 'positions') renderTerminal();
+                
+            }, 750); // Tick every 750ms for realistic rapid action
+        }
+
+        async function loadChartData(symbol) {
+            document.getElementById('chartLoader').style.display = 'flex';
+            if(candleSeries) {
+                lwChart.removeSeries(candleSeries);
+                candleSeries = null;
             }
-            
-            // Sync last candle with actual current price
-            const last = data[data.length-1];
-            last.close = asset.bid;
-            if(asset.bid > last.high) last.high = asset.bid;
-            if(asset.bid < last.low) last.low = asset.bid;
 
-            chartDataBuffer[asset.symbol] = data;
-            return data;
+            // Simulate network loading time
+            await new Promise(r => setTimeout(r, 600));
+
+            try {
+                const asset = state.assets.find(a => a.symbol === symbol);
+                let basePrice = asset.bid;
+                const formattedData = [];
+                
+                // Generate 300 historical 15m candles backwards from now
+                let time = Math.floor(Date.now() / 1000) - (300 * 900); 
+
+                for(let i=0; i < 300; i++) {
+                    const open = basePrice;
+                    const close = open + (Math.random() - 0.5) * asset.volatility * 4;
+                    const high = Math.max(open, close) + Math.random() * asset.volatility;
+                    const low = Math.min(open, close) - Math.random() * asset.volatility;
+                    
+                    formattedData.push({ time: time, open, high, low, close });
+                    basePrice = close;
+                    time += 900; 
+                }
+
+                // Sync current live asset price to the simulated historical close to prevent jarring jumps
+                currentLiveCandle = formattedData[formattedData.length - 1];
+                asset.bid = currentLiveCandle.close;
+                asset.ask = asset.bid + asset.spread;
+
+                candleSeries = lwChart.addCandlestickSeries({
+                    upColor: '#00F3FF',       // Neon Cyan Bullish
+                    downColor: '#FF00EA',     // Neon Magenta Bearish
+                    borderVisible: false,
+                    wickUpColor: '#00F3FF',
+                    wickDownColor: '#FF00EA',
+                    priceFormat: {
+                        type: 'price',
+                        precision: asset.digits,
+                        minMove: 1 / Math.pow(10, asset.digits)
+                    }
+                });
+
+                candleSeries.setData(formattedData);
+                
+                // Re-apply open position lines for this symbol
+                state.positions.forEach(pos => {
+                    if(pos.symbol === state.ui.activeSymbol) drawOrderLineOnChart(pos);
+                });
+
+            } catch(e) {
+                showToast("Data Error", "Failed to generate local historical data.", true);
+            } finally {
+                document.getElementById('chartLoader').style.display = 'none';
+            }
         }
 
         function initTradingView() {
             const container = document.getElementById('tv_chart_container');
-            container.innerHTML = ''; // clear
+            if(lwChart) { lwChart.remove(); lwChart = null; } // Complete re-init for cleanliness
             
             lwChart = LightweightCharts.createChart(container, {
                 width: container.clientWidth,
                 height: container.clientHeight,
                 layout: {
-                    background: { type: 'solid', color: '#030407' },
-                    textColor: '#9CA3AF',
+                    background: { type: 'solid', color: 'transparent' }, // Use container background
+                    textColor: '#8B9BB4',
                     fontFamily: "'JetBrains Mono', monospace",
                 },
                 grid: {
-                    vertLines: { color: '#0A0E17' },
-                    horzLines: { color: '#0A0E17' },
+                    vertLines: { color: 'rgba(0, 243, 255, 0.05)' },
+                    horzLines: { color: 'rgba(0, 243, 255, 0.05)' },
                 },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
-                    vertLine: { color: '#1F2937', labelBackgroundColor: '#2563EB' },
-                    horzLine: { color: '#1F2937', labelBackgroundColor: '#2563EB' },
+                    vertLine: { color: '#00F3FF', labelBackgroundColor: '#000000', width: 1, style: LightweightCharts.LineStyle.Dashed },
+                    horzLine: { color: '#00F3FF', labelBackgroundColor: '#000000', width: 1, style: LightweightCharts.LineStyle.Dashed },
                 },
-                rightPriceScale: {
-                    borderColor: '#1F2937',
-                },
-                timeScale: {
-                    borderColor: '#1F2937',
-                    timeVisible: true,
-                },
-            });
-
-            candleSeries = lwChart.addCandlestickSeries({
-                upColor: '#2563EB',       // Blue Bullish
-                downColor: '#FFFFFF',      // White Bearish
-                borderDownColor: '#FFFFFF',
-                borderUpColor: '#2563EB',
-                wickDownColor: '#FFFFFF',
-                wickUpColor: '#2563EB',
-            });
-
-            const asset = state.assets.find(a => a.symbol === state.ui.activeSymbol);
-            const data = generateHistoricalData(asset);
-            candleSeries.setData(data);
-
-            // Re-apply open position lines for this symbol
-            state.positions.forEach(pos => {
-                if(pos.symbol === state.ui.activeSymbol) {
-                    drawOrderLineOnChart(pos);
-                }
+                rightPriceScale: { borderColor: 'rgba(0, 243, 255, 0.2)' },
+                timeScale: { borderColor: 'rgba(0, 243, 255, 0.2)', timeVisible: true },
             });
 
             // Handle Resize
@@ -558,11 +598,13 @@
                 const newRect = entries[0].contentRect;
                 lwChart.applyOptions({ height: newRect.height, width: newRect.width });
             }).observe(container);
+            
+            loadChartData(state.ui.activeSymbol);
         }
 
         function drawOrderLineOnChart(pos) {
             if(!candleSeries || pos.symbol !== state.ui.activeSymbol) return;
-            const color = pos.type === 'BUY' ? '#2563EB' : '#FFFFFF';
+            const color = pos.type === 'BUY' ? '#00F3FF' : '#FF00EA';
             pos.priceLineRef = candleSeries.createPriceLine({
                 price: pos.openPrice,
                 color: color,
@@ -573,25 +615,16 @@
             });
         }
 
-        // --- STREAMING_CHUNK: UI Interactions and Layout ---
         function toggleProfileModal() {
             const modal = document.getElementById('profileModal');
             const content = document.getElementById('profileContent');
             
             if(modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    content.classList.remove('scale-95');
-                }, 10);
+                modal.classList.remove('hidden'); modal.classList.add('flex');
+                setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
             } else {
-                modal.classList.add('opacity-0');
-                content.classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }, 300);
+                modal.classList.add('opacity-0'); content.classList.add('scale-95');
+                setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
             }
         }
 
@@ -601,40 +634,30 @@
             const icon = document.getElementById('terminalToggleIcon');
             
             if (state.ui.terminalCollapsed) {
-                layout.classList.add('terminal-collapsed');
-                icon.classList.add('rotate-180');
+                layout.classList.add('terminal-collapsed'); icon.classList.add('rotate-180');
             } else {
-                layout.classList.remove('terminal-collapsed');
-                icon.classList.remove('rotate-180');
+                layout.classList.remove('terminal-collapsed'); icon.classList.remove('rotate-180');
             }
-            
-            // Force chart resize
             setTimeout(() => {
                 if(lwChart) {
                     const container = document.getElementById('tv_chart_container');
                     lwChart.applyOptions({ height: container.clientHeight, width: container.clientWidth });
                 }
-            }, 300); // match CSS transition duration
+            }, 300); 
         }
 
         function switchMobileView(viewId, btnElement) {
-            document.getElementById('view-market').classList.remove('view-active');
-            document.getElementById('view-chart').classList.remove('view-active');
-            document.getElementById('view-portfolio').classList.remove('view-active');
-            
+            ['view-market', 'view-chart', 'view-portfolio'].forEach(id => document.getElementById(id).classList.remove('view-active'));
             document.getElementById(viewId).classList.add('view-active');
             
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-accent-blue');
-                btn.classList.add('text-text-secondary');
+                btn.classList.remove('text-neon-cyan'); btn.classList.add('text-text-secondary');
                 const icon = btn.querySelector('i');
                 if(icon.className.includes('ph-fill')) icon.className = icon.className.replace('ph-fill', 'ph');
             });
             
-            btnElement.classList.remove('text-text-secondary');
-            btnElement.classList.add('text-accent-blue');
-            const activeIcon = btnElement.querySelector('i');
-            activeIcon.className = activeIcon.className.replace('ph ', 'ph-fill ');
+            btnElement.classList.remove('text-text-secondary'); btnElement.classList.add('text-neon-cyan');
+            const activeIcon = btnElement.querySelector('i'); activeIcon.className = activeIcon.className.replace('ph ', 'ph-fill ');
             
             if(viewId === 'view-chart' && lwChart) {
                 setTimeout(() => {
@@ -644,82 +667,62 @@
             }
         }
 
-        function setCategory(cat, btnElement) {
-            state.ui.categoryFilter = cat;
-            const buttons = document.getElementById('categoryFilters').children;
-            for(let btn of buttons) btn.className = "px-3 py-1 rounded bg-panel-hover text-text-secondary hover:text-white transition-colors";
-            btnElement.className = "px-3 py-1 rounded bg-accent-blue text-white";
-            renderMarketWatch();
-        }
-
         document.getElementById('marketSearch').addEventListener('input', (e) => {
             state.ui.searchQuery = e.target.value.toLowerCase();
             renderMarketWatch();
         });
 
-        function selectSymbol(symbol, desc) {
+        function selectSymbol(symbol, name) {
             state.ui.activeSymbol = symbol;
-            document.getElementById('chartTitle').innerText = symbol;
-            document.getElementById('chartDesc').innerText = desc;
+            document.getElementById('chartTitle').innerHTML = `${symbol} <span class="flex h-2 w-2 rounded-full bg-neon-cyan animate-pulse"></span>`;
+            document.getElementById('chartDesc').innerText = name;
             
             renderMarketWatch(); 
             updateQuickTradeWidget();
-            initTradingView(); 
+            loadChartData(symbol); 
             
-            if(window.innerWidth <= 768) {
-                const chartBtn = document.querySelectorAll('.nav-btn')[1];
-                switchMobileView('view-chart', chartBtn);
-            }
+            if(window.innerWidth <= 768) switchMobileView('view-chart', document.querySelectorAll('.nav-btn')[1]);
         }
 
         function renderMarketWatch() {
             const container = document.getElementById('marketList');
             container.innerHTML = '';
             
-            const filteredAssets = state.assets.filter(a => {
-                const matchesSearch = a.symbol.toLowerCase().includes(state.ui.searchQuery) || a.name.toLowerCase().includes(state.ui.searchQuery);
-                const matchesCat = state.ui.categoryFilter === 'All' || a.type === state.ui.categoryFilter;
-                return matchesSearch && matchesCat;
-            });
+            const filteredAssets = state.assets.filter(a => 
+                a.symbol.toLowerCase().includes(state.ui.searchQuery) || a.name.toLowerCase().includes(state.ui.searchQuery)
+            );
 
             filteredAssets.forEach(asset => {
                 const isActive = asset.symbol === state.ui.activeSymbol;
                 const row = document.createElement('div');
-                row.className = `grid grid-cols-4 px-3 py-3 border-b border-border-color cursor-pointer transition-all ${isActive ? 'bg-panel-hover border-l-2 border-l-accent-blue' : 'hover:bg-panel-hover border-l-2 border-l-transparent'}`;
+                row.id = `mw-row-${asset.symbol}`;
+                row.className = `grid grid-cols-4 px-4 py-3 border-b border-border-color cursor-pointer transition-all ${isActive ? 'bg-neon-cyan/5 border-l-2 border-l-neon-cyan' : 'hover:bg-panel-hover border-l-2 border-l-transparent'}`;
                 row.onclick = () => selectSymbol(asset.symbol, asset.name);
                 
-                const formatPrice = (p) => {
-                    const s = p.toFixed(asset.digits);
-                    return { main: s.slice(0,-1), last: s.slice(-1) };
-                };
-                const bid = formatPrice(asset.bid);
-                const ask = formatPrice(asset.ask);
-
                 row.innerHTML = `
                     <div class="col-span-2 flex flex-col justify-center overflow-hidden">
-                        <span class="font-bold text-text-primary text-[13px] ${isActive ? 'text-accent-blue' : ''}">${asset.symbol}</span>
-                        <span class="text-[9px] text-text-secondary truncate">${asset.name}</span>
+                        <span class="font-black text-text-primary text-[13px] ${isActive ? 'text-neon-cyan' : ''}">${asset.symbol}</span>
+                        <span class="text-[9px] text-text-secondary truncate uppercase tracking-widest">${asset.name}</span>
                     </div>
                     <div class="text-right font-mono text-[13px] text-text-primary flex items-center justify-end" id="mw-bid-${asset.symbol}">
-                        ${bid.main}<span class="text-[10px] text-text-secondary align-top">${bid.last}</span>
+                        ${asset.bid > 0 ? asset.bid.toFixed(asset.digits) : '...'}
                     </div>
                     <div class="text-right font-mono text-[13px] text-text-primary flex items-center justify-end" id="mw-ask-${asset.symbol}">
-                        ${ask.main}<span class="text-[10px] text-text-secondary align-top">${ask.last}</span>
+                        ${asset.ask > 0 ? asset.ask.toFixed(asset.digits) : '...'}
                     </div>
                 `;
                 container.appendChild(row);
             });
         }
 
-        // --- STREAMING_CHUNK: Order Management and Mechanics ---
         function toggleTradeWidget() {
-            document.getElementById('quickTradeWidget').classList.toggle('hidden');
+            const widget = document.getElementById('quickTradeWidget');
+            widget.classList.toggle('hidden');
         }
 
         function adjustVolume(delta) {
             let v = parseFloat(document.getElementById('qt-volume').value) + delta;
-            if(v < 0.01) v = 0.01;
-            if(v > 100) v = 100;
+            if(v < 0.01) v = 0.01; if(v > 100) v = 100;
             state.ui.volume = v;
             document.getElementById('qt-volume').value = v.toFixed(2);
         }
@@ -728,23 +731,25 @@
             const asset = state.assets.find(a => a.symbol === state.ui.activeSymbol);
             if (!asset) return;
             document.getElementById('qt-symbol').innerText = asset.symbol;
-            document.getElementById('qt-sell-price').innerText = asset.bid.toFixed(asset.digits);
-            document.getElementById('qt-buy-price').innerText = asset.ask.toFixed(asset.digits);
+            document.getElementById('qt-sell-price').innerText = asset.bid > 0 ? asset.bid.toFixed(asset.digits) : '0.00';
+            document.getElementById('qt-buy-price').innerText = asset.ask > 0 ? asset.ask.toFixed(asset.digits) : '0.00';
         }
 
         async function placeOrder(type) {
             await initAudio(); 
             
             const asset = state.assets.find(a => a.symbol === state.ui.activeSymbol);
+            if(asset.bid === 0) { showToast('Execution Failed', 'Waiting for price feed...', true); return; }
+            
             const price = type === 'BUY' ? asset.ask : asset.bid;
             const vol = state.ui.volume;
             
-            const reqMargin = (vol * 100000) / state.account.leverage;
+            // Simplified margin check for demo
+            const reqMargin = (vol * price) / state.account.leverage;
             if (reqMargin > (state.account.equity - state.account.margin)) {
-                showToast('Execution Failed', 'Not enough free margin.');
+                showToast('Execution Rejected', 'Insufficient Free Margin.', true);
                 if(audioInit) synthLoss.triggerAttackRelease(["C3", "G2"], "8n");
-                triggerVibration(200);
-                return;
+                triggerVibration([200]); return;
             }
 
             const btn = document.getElementById(type === 'BUY' ? 'btn-buy' : 'btn-sell');
@@ -753,25 +758,23 @@
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.remove('opacity-0'), 10);
             
-            if(audioInit) synthUI.triggerAttackRelease("C5", "32n"); 
+            if(audioInit) synthUI.triggerAttackRelease("C6", "32n"); 
 
-            // Simulate broker execution latency
-            await new Promise(r => setTimeout(r, 300 + Math.random() * 400));
+            // Simulate broker execution latency over "secure node"
+            await new Promise(r => setTimeout(r, 400 + Math.random() * 500));
 
             overlay.classList.add('opacity-0');
             setTimeout(() => overlay.classList.add('hidden'), 200);
             btn.classList.remove('pointer-events-none', 'scale-95');
 
             const ticket = Math.floor(100000 + Math.random() * 900000); 
-            
             const pos = { ticket, symbol: asset.symbol, type, volume: vol, digits: asset.digits, openPrice: price, time: Date.now() };
             state.positions.push(pos);
             
-            // Draw on chart if applicable
             drawOrderLineOnChart(pos);
-
             if(state.ui.activeTab !== 'positions') setTerminalTab('positions');
             renderTerminal();
+            
             showToast('Order Filled', `${type} ${vol.toFixed(2)} ${asset.symbol} @ ${price.toFixed(asset.digits)}`);
             
             const body = document.getElementById('app-body');
@@ -779,7 +782,7 @@
             body.classList.add(type === 'BUY' ? 'flash-buy' : 'flash-sell');
             setTimeout(() => body.classList.remove('shake-screen', 'flash-buy', 'flash-sell'), 500);
 
-            if(audioInit) synthSuccess.triggerAttackRelease(["C5", "E5", "G5"], "8n");
+            if(audioInit) synthSuccess.triggerAttackRelease(["C5", "E5", "G5", "C6"], "8n");
             triggerVibration([50, 50, 50]);
             document.getElementById('mobile-badge').classList.remove('hidden');
         }
@@ -795,11 +798,11 @@
                 const row = document.getElementById(`pos-row-${ticket}`);
                 if(row) {
                     row.classList.add('opacity-50', 'pointer-events-none');
-                    row.innerHTML = `<div class="col-span-10 text-center text-accent-blue flex justify-center items-center gap-2 py-2 text-xs font-sans"><i class="ph ph-spinner-gap animate-spin"></i> Routing #${ticket}...</div>`;
+                    row.innerHTML = `<div class="col-span-10 text-center text-neon-cyan flex justify-center items-center gap-2 py-2 text-xs font-mono tracking-widest uppercase"><i class="ph ph-circle-notch animate-spin"></i> Routing #${ticket}...</div>`;
                 }
                 
-                if(audioInit) synthUI.triggerAttackRelease("G4", "32n");
-                await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
+                if(audioInit) synthUI.triggerAttackRelease("G5", "32n");
+                await new Promise(r => setTimeout(r, 400 + Math.random() * 400));
 
                 pos.profit = calculatePnL(pos);
                 pos.closePrice = currentPrice;
@@ -808,26 +811,23 @@
                 state.account.balance += pos.profit;
                 state.history.push(pos);
                 
-                // Remove price line from chart if exists
-                if(pos.priceLineRef && candleSeries) {
-                    candleSeries.removePriceLine(pos.priceLineRef);
-                }
-
+                if(pos.priceLineRef && candleSeries) candleSeries.removePriceLine(pos.priceLineRef);
                 state.positions.splice(idx, 1);
+                
                 renderTerminal();
-                showToast('Position Closed', `Order #${ticket} closed. PnL: $${pos.profit.toFixed(2)}`);
+                
+                const isWin = pos.profit >= 0;
+                showToast('Position Closed', `Order #${ticket} PnL: $${pos.profit.toFixed(2)}`, !isWin);
                 
                 const body = document.getElementById('app-body');
-                if (pos.profit >= 0) {
+                if (isWin) {
                     if(audioInit) synthSuccess.triggerAttackRelease(["E5", "G5", "C6"], "4n"); 
                     triggerVibration([100, 50, 100]);
-                    body.classList.add('flash-buy');
-                    setTimeout(() => body.classList.remove('flash-buy'), 500);
+                    body.classList.add('flash-buy'); setTimeout(() => body.classList.remove('flash-buy'), 500);
                 } else {
                     if(audioInit) synthLoss.triggerAttackRelease(["E3", "C3"], "4n"); 
                     triggerVibration([200]);
-                    body.classList.add('flash-sell');
-                    setTimeout(() => body.classList.remove('flash-sell'), 500);
+                    body.classList.add('flash-sell'); setTimeout(() => body.classList.remove('flash-sell'), 500);
                 }
                 
                 if(state.positions.length === 0) document.getElementById('mobile-badge').classList.add('hidden');
@@ -836,11 +836,11 @@
 
         function calculatePnL(pos) {
             const asset = state.assets.find(a => a.symbol === pos.symbol);
-            if(!asset) return 0;
+            if(!asset || asset.bid === 0) return 0;
             const currentPrice = pos.type === 'BUY' ? asset.bid : asset.ask;
+            // Crypto PnL calculation: (Exit Price - Entry Price) * Volume
             const diff = pos.type === 'BUY' ? (currentPrice - pos.openPrice) : (pos.openPrice - currentPrice);
-            const multiplier = asset.digits === 3 ? 100 : (asset.digits === 2 ? 1 : 10000);
-            return diff * multiplier * pos.volume * 10; 
+            return diff * pos.volume; 
         }
 
         function setTerminalTab(tab) {
@@ -848,13 +848,14 @@
             const tabPos = document.getElementById('tab-positions');
             const tabHis = document.getElementById('tab-history');
             
+            const activeClass = "px-6 h-full text-xs font-bold text-neon-cyan border-b-2 border-neon-cyan transition-all uppercase tracking-wider";
+            const inactiveClass = "px-6 h-full text-xs font-bold text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all uppercase tracking-wider";
+
             if(tab === 'positions') {
-                tabPos.className = "px-5 py-2 text-xs font-semibold text-accent-blue border-b-2 border-accent-blue transition-all";
-                tabHis.className = "px-5 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all";
+                tabPos.className = activeClass; tabHis.className = inactiveClass;
                 document.getElementById('terminalHeader').innerHTML = `<div class="col-span-2">Symbol</div><div class="col-span-1">Ticket</div><div class="col-span-1">Type</div><div class="col-span-1">Vol</div><div class="col-span-1 text-right">Open</div><div class="col-span-1 text-right">Current</div><div class="col-span-2 text-right">Profit</div><div class="col-span-1 text-right"></div>`;
             } else {
-                tabHis.className = "px-5 py-2 text-xs font-semibold text-accent-blue border-b-2 border-accent-blue transition-all";
-                tabPos.className = "px-5 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all";
+                tabHis.className = activeClass; tabPos.className = inactiveClass;
                 document.getElementById('terminalHeader').innerHTML = `<div class="col-span-2">Symbol</div><div class="col-span-2">Ticket</div><div class="col-span-1">Type</div><div class="col-span-1">Vol</div><div class="col-span-2 text-right">Open / Close</div><div class="col-span-2 text-right">Profit</div>`;
             }
             renderTerminal();
@@ -868,32 +869,32 @@
 
             if (state.ui.activeTab === 'positions') {
                 if (state.positions.length === 0) {
-                    container.innerHTML = `<div class="p-4 text-center text-text-secondary text-xs">No open positions.</div>`;
+                    container.innerHTML = `<div class="p-8 text-center text-text-secondary text-xs font-mono uppercase tracking-widest">No active systems.</div>`;
                 } else {
                     state.positions.forEach(pos => {
                         const asset = state.assets.find(a => a.symbol === pos.symbol);
                         const currentPrice = pos.type === 'BUY' ? asset.bid : asset.ask;
                         const profit = calculatePnL(pos);
                         totalProfit += profit;
-                        usedMargin += (pos.volume * 100000) / state.account.leverage;
+                        usedMargin += (pos.volume * pos.openPrice) / state.account.leverage;
 
-                        const typeColor = pos.type === 'BUY' ? 'text-accent-blue' : 'text-text-primary'; 
+                        const typeColor = pos.type === 'BUY' ? 'text-neon-cyan' : 'text-neon-magenta'; 
                         const pnlColor = profit >= 0 ? 'text-pnl-up' : 'text-pnl-down';
                         
                         const row = document.createElement('div');
                         row.id = `pos-row-${pos.ticket}`; 
-                        row.className = `grid grid-cols-10 gap-2 px-4 py-2 text-[11px] font-mono border-b border-border-color hover:bg-panel-hover items-center transition-all duration-300`;
+                        row.className = `grid grid-cols-10 gap-2 px-4 py-2.5 text-[11px] font-mono border-b border-border-color hover:bg-panel-hover items-center transition-all duration-300`;
                         row.innerHTML = `
-                            <div class="col-span-2 font-bold font-sans text-text-primary">${pos.symbol}</div>
+                            <div class="col-span-2 font-black font-sans text-text-primary tracking-wide">${pos.symbol}</div>
                             <div class="col-span-1 text-text-secondary">#${pos.ticket}</div>
-                            <div class="col-span-1 font-bold ${typeColor} font-sans">${pos.type}</div>
+                            <div class="col-span-1 font-bold ${typeColor} font-sans uppercase tracking-widest">${pos.type}</div>
                             <div class="col-span-1 text-text-primary">${pos.volume.toFixed(2)}</div>
                             <div class="col-span-1 text-right text-text-secondary">${pos.openPrice.toFixed(pos.digits)}</div>
-                            <div class="col-span-1 text-right text-text-primary">${currentPrice.toFixed(pos.digits)}</div>
-                            <div class="col-span-2 text-right font-bold ${pnlColor}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}</div>
+                            <div class="col-span-1 text-right text-text-primary font-bold">${currentPrice > 0 ? currentPrice.toFixed(pos.digits) : '...'}</div>
+                            <div class="col-span-2 text-right font-black ${pnlColor}">${profit > 0 ? '+' : ''}${profit.toFixed(2)}</div>
                             <div class="col-span-1 flex justify-end">
-                                <button class="w-6 h-6 rounded bg-border-color hover:bg-pnl-down flex items-center justify-center text-text-secondary hover:text-white transition-all" onclick="closePosition(${pos.ticket})">
-                                    <i class="ph ph-x"></i>
+                                <button class="w-6 h-6 rounded bg-border-color hover:bg-neon-magenta flex items-center justify-center text-text-secondary hover:text-white transition-all shadow-sm" onclick="closePosition(${pos.ticket})">
+                                    <i class="ph-bold ph-x"></i>
                                 </button>
                             </div>
                         `;
@@ -902,21 +903,21 @@
                 }
             } else {
                 if (state.history.length === 0) {
-                    container.innerHTML = `<div class="p-4 text-center text-text-secondary text-xs">No trading history.</div>`;
+                    container.innerHTML = `<div class="p-8 text-center text-text-secondary text-xs font-mono uppercase tracking-widest">System history is empty.</div>`;
                 } else {
                     [...state.history].reverse().forEach(pos => {
-                        const typeColor = pos.type === 'BUY' ? 'text-accent-blue' : 'text-text-primary'; 
+                        const typeColor = pos.type === 'BUY' ? 'text-neon-cyan' : 'text-neon-magenta'; 
                         const pnlColor = pos.profit >= 0 ? 'text-pnl-up' : 'text-pnl-down';
                         
                         const row = document.createElement('div');
-                        row.className = `grid grid-cols-10 gap-2 px-4 py-2 text-[11px] font-mono border-b border-border-color hover:bg-panel-hover items-center`;
+                        row.className = `grid grid-cols-10 gap-2 px-4 py-2.5 text-[11px] font-mono border-b border-border-color hover:bg-panel-hover items-center`;
                         row.innerHTML = `
-                            <div class="col-span-2 font-bold font-sans text-text-primary">${pos.symbol}</div>
+                            <div class="col-span-2 font-black font-sans text-text-primary tracking-wide">${pos.symbol}</div>
                             <div class="col-span-2 text-text-secondary">#${pos.ticket}</div>
-                            <div class="col-span-1 font-bold ${typeColor} font-sans">${pos.type}</div>
+                            <div class="col-span-1 font-bold ${typeColor} font-sans uppercase tracking-widest">${pos.type}</div>
                             <div class="col-span-1 text-text-primary">${pos.volume.toFixed(2)}</div>
                             <div class="col-span-2 text-right text-text-secondary">${pos.openPrice.toFixed(pos.digits)} / ${pos.closePrice.toFixed(pos.digits)}</div>
-                            <div class="col-span-2 text-right font-bold ${pnlColor}">${pos.profit > 0 ? '+' : ''}${pos.profit.toFixed(2)}</div>
+                            <div class="col-span-2 text-right font-black ${pnlColor}">${pos.profit > 0 ? '+' : ''}${pos.profit.toFixed(2)}</div>
                         `;
                         container.appendChild(row);
                     });
@@ -927,84 +928,27 @@
             state.account.equity = state.account.balance + totalProfit;
             
             document.getElementById('headerBalance').innerText = formatMoney(state.account.balance);
-            document.getElementById('ft-balance').innerText = state.account.balance.toFixed(2);
-            document.getElementById('ft-equity').innerText = state.account.equity.toFixed(2);
-            document.getElementById('ft-margin').innerText = state.account.margin.toFixed(2);
-            document.getElementById('ft-free').innerText = (state.account.equity - state.account.margin).toFixed(2);
+            document.getElementById('ft-balance').innerText = formatMoney(state.account.balance);
+            document.getElementById('ft-equity').innerText = formatMoney(state.account.equity);
+            document.getElementById('ft-margin').innerText = formatMoney(state.account.margin);
             
             const pnlEl = document.getElementById('ft-pnl');
-            pnlEl.innerText = `${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}`;
-            pnlEl.className = `font-bold text-sm ${totalProfit >= 0 ? 'text-pnl-up' : (totalProfit < 0 ? 'text-pnl-down' : 'text-text-primary')}`;
+            pnlEl.innerText = `${totalProfit >= 0 ? '+' : ''}${formatMoney(totalProfit)}`;
+            pnlEl.className = `font-black text-sm ${totalProfit > 0 ? 'text-pnl-up' : (totalProfit < 0 ? 'text-pnl-down' : 'text-text-primary')}`;
         }
 
-        // --- STREAMING_CHUNK: Live Price & Chart Update Loop ---
-        setInterval(() => {
-            let activeAssetTick = null;
-            
-            state.assets.forEach(asset => {
-                const volatility = asset.symbol === 'BTCUSD' ? 10 : (asset.digits <= 3 ? 0.05 : 0.00005);
-                const change = (Math.random() - 0.5) * volatility;
-                
-                const oldBid = asset.bid;
-                asset.bid += change;
-                const pipValue = asset.digits === 3 ? 0.01 : (asset.digits === 2 ? 1 : 0.00001);
-                asset.ask = asset.bid + (asset.spread * pipValue);
-                
-                // Visual Updates for Market Watch
-                const bidEl = document.getElementById(`mw-bid-${asset.symbol}`);
-                if (bidEl) {
-                    const isUp = asset.bid > oldBid;
-                    const formatPrice = (p) => { const s = p.toFixed(asset.digits); return { main: s.slice(0,-1), last: s.slice(-1) }; };
-                    const bid = formatPrice(asset.bid);
-                    const ask = formatPrice(asset.ask);
-                    
-                    bidEl.innerHTML = `${bid.main}<span class="text-[10px] text-text-secondary align-top">${bid.last}</span>`;
-                    document.getElementById(`mw-ask-${asset.symbol}`).innerHTML = `${ask.main}<span class="text-[10px] text-text-secondary align-top">${ask.last}</span>`;
-                    
-                    bidEl.parentElement.classList.remove('tick-up', 'tick-down');
-                    void bidEl.parentElement.offsetWidth; // Reflow
-                    bidEl.parentElement.classList.add(isUp ? 'tick-up' : 'tick-down');
-                }
-
-                if (asset.symbol === state.ui.activeSymbol) {
-                    activeAssetTick = asset;
-                    updateQuickTradeWidget();
-                }
-            });
-            
-            // Update Lightweight Chart Tick
-            if (activeAssetTick && candleSeries && chartDataBuffer[activeAssetTick.symbol]) {
-                const data = chartDataBuffer[activeAssetTick.symbol];
-                const last = data[data.length-1];
-                
-                const now = Math.floor(Date.now() / 1000);
-                // Simple 15m candle update simulation
-                if (now - last.time > 15 * 60) {
-                    const newCandle = { time: now - (now % (15*60)), open: last.close, high: last.close, low: last.close, close: activeAssetTick.bid };
-                    data.push(newCandle);
-                    candleSeries.update(newCandle);
-                } else {
-                    last.close = activeAssetTick.bid;
-                    if(activeAssetTick.bid > last.high) last.high = activeAssetTick.bid;
-                    if(activeAssetTick.bid < last.low) last.low = activeAssetTick.bid;
-                    candleSeries.update(last);
-                }
-            }
-            
-            if(state.positions.length > 0 && state.ui.activeTab === 'positions') renderTerminal();
-        }, 1500);
-
-        // Init
+        // Init Sequence
         window.onload = () => {
-            setCategory('All', document.getElementById('categoryFilters').children[0]);
+            document.getElementById('headerBalance').innerText = formatMoney(state.account.balance);
+            renderMarketWatch();
+            initTradingView();
+            initLivePrices();
             setTerminalTab('positions');
-            selectSymbol(state.ui.activeSymbol, "Euro / US Dollar");
             
             document.getElementById('qt-volume').addEventListener('change', (e) => {
                 let v = parseFloat(e.target.value);
                 if(isNaN(v) || v < 0.01) v = 0.01;
-                state.ui.volume = v;
-                e.target.value = v.toFixed(2);
+                state.ui.volume = v; e.target.value = v.toFixed(2);
             });
         };
     </script>
