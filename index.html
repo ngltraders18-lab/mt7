@@ -42,6 +42,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Load TradingView Script -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <!-- Load Tone.js for Synthesized Trading Sounds -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
     <style>
         :root { color-scheme: dark; }
@@ -136,13 +138,40 @@
         .tick-up { animation: flashBlue 0.5s ease-out; }
         .tick-down { animation: flashWhite 0.5s ease-out; }
 
+        /* Immersive Trading Animations */
+        @keyframes screenShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+        .shake-screen { animation: screenShake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+
+        @keyframes screenFlashBlue {
+            0% { box-shadow: inset 0 0 100px rgba(37, 99, 235, 0.4); background-color: rgba(37, 99, 235, 0.05); }
+            100% { box-shadow: inset 0 0 0px transparent; background-color: transparent; }
+        }
+        @keyframes screenFlashWhite {
+            0% { box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.2); background-color: rgba(255, 255, 255, 0.03); }
+            100% { box-shadow: inset 0 0 0px transparent; background-color: transparent; }
+        }
+        .flash-buy { animation: screenFlashBlue 0.4s ease-out; }
+        .flash-sell { animation: screenFlashWhite 0.4s ease-out; }
+
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none; margin: 0;
         }
     </style>
 </head>
-<body class="font-sans text-sm tracking-tight flex flex-col h-screen overflow-hidden">
+<body class="font-sans text-sm tracking-tight flex flex-col h-screen overflow-hidden" id="app-body">
 
     <div class="layout-grid" id="main-layout">
 
@@ -238,15 +267,21 @@
 
                 <div class="flex gap-2 h-16">
                     <!-- Sell Button (White/Bearish) -->
-                    <button class="flex-1 rounded-lg bg-panel-hover border border-text-secondary hover:border-white hover:shadow-glow-white flex flex-col items-center justify-center transition-all group" onclick="placeOrder('SELL')">
-                        <span class="text-[10px] uppercase font-bold text-text-secondary group-hover:text-white mb-0.5">Sell</span>
-                        <div class="font-mono text-sm font-bold text-text-primary group-hover:text-white" id="qt-sell-price">0.0000</div>
+                    <button id="btn-sell" class="flex-1 rounded-lg bg-panel-hover border border-text-secondary hover:border-white hover:shadow-glow-white flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('SELL')">
+                        <span class="text-[10px] uppercase font-bold text-text-secondary group-hover:text-white mb-0.5 transition-all">Sell</span>
+                        <div class="font-mono text-sm font-bold text-text-primary group-hover:text-white transition-all" id="qt-sell-price">0.0000</div>
+                        <div class="absolute inset-0 bg-white/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-sm" id="overlay-sell">
+                            <i class="ph ph-spinner-gap animate-spin text-white text-xl"></i>
+                        </div>
                     </button>
                     
                     <!-- Buy Button (Blue/Bullish) -->
-                    <button class="flex-1 rounded-lg bg-panel-hover border border-accent-blue/50 hover:border-accent-blue hover:shadow-glow-blue flex flex-col items-center justify-center transition-all group" onclick="placeOrder('BUY')">
-                        <span class="text-[10px] uppercase font-bold text-accent-blue/80 group-hover:text-accent-blue mb-0.5">Buy</span>
-                        <div class="font-mono text-sm font-bold text-text-primary group-hover:text-white" id="qt-buy-price">0.0000</div>
+                    <button id="btn-buy" class="flex-1 rounded-lg bg-panel-hover border border-accent-blue/50 hover:border-accent-blue hover:shadow-glow-blue flex flex-col items-center justify-center transition-all group relative overflow-hidden" onclick="placeOrder('BUY')">
+                        <span class="text-[10px] uppercase font-bold text-accent-blue/80 group-hover:text-accent-blue mb-0.5 transition-all">Buy</span>
+                        <div class="font-mono text-sm font-bold text-text-primary group-hover:text-white transition-all" id="qt-buy-price">0.0000</div>
+                        <div class="absolute inset-0 bg-accent-blue/20 flex items-center justify-center opacity-0 transition-opacity hidden backdrop-blur-sm" id="overlay-buy">
+                            <i class="ph ph-spinner-gap animate-spin text-accent-blue text-xl"></i>
+                        </div>
                     </button>
                 </div>
             </div>
@@ -353,6 +388,47 @@
         };
 
         let tvWidget = null;
+
+        // --- STREAMING_CHUNK: Audio Engine Setup ---
+        let audioInit = false;
+        
+        // Mechanical UI click sound
+        const synthUI = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "square" },
+            envelope: { attack: 0.01, decay: 0.1, sustain: 0.0, release: 0.1 }
+        }).toDestination();
+        synthUI.volume.value = -20;
+
+        // Success / Buy chime
+        const synthSuccess = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.05, decay: 0.2, sustain: 0.2, release: 1 }
+        }).toDestination();
+        synthSuccess.volume.value = -12;
+        
+        // Loss / Error sound
+        const synthLoss = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "sawtooth" },
+            envelope: { attack: 0.1, decay: 0.3, sustain: 0.1, release: 1 }
+        }).toDestination();
+        synthLoss.volume.value = -15;
+
+        // Initialize audio context on first user interaction
+        async function initAudio() {
+            if(!audioInit) {
+                await Tone.start();
+                audioInit = true;
+            }
+        }
+        document.body.addEventListener('click', initAudio, { once: true });
+        document.body.addEventListener('touchstart', initAudio, { once: true });
+
+        // Haptic Feedback wrapper
+        function triggerVibration(pattern) {
+            if (typeof navigator.vibrate === 'function') {
+                navigator.vibrate(pattern);
+            }
+        }
 
         // Utilities
         const formatMoney = (amount) => amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -541,7 +617,9 @@
             document.getElementById('qt-buy-price').innerText = asset.ask.toFixed(asset.digits);
         }
 
-        function placeOrder(type) {
+        async function placeOrder(type) {
+            await initAudio(); // Ensure audio context is ready
+            
             const asset = state.assets.find(a => a.symbol === state.ui.activeSymbol);
             const price = type === 'BUY' ? asset.ask : asset.bid;
             const vol = state.ui.volume;
@@ -550,8 +628,27 @@
             const reqMargin = (vol * 100000) / state.account.leverage;
             if (reqMargin > (state.account.equity - state.account.margin)) {
                 showToast('Execution Failed', 'Not enough free margin.');
+                if(audioInit) synthLoss.triggerAttackRelease(["C3", "G2"], "8n");
+                triggerVibration(200);
                 return;
             }
+
+            // IMMERSIVE: Loading state on button
+            const btn = document.getElementById(type === 'BUY' ? 'btn-buy' : 'btn-sell');
+            const overlay = document.getElementById(type === 'BUY' ? 'overlay-buy' : 'overlay-sell');
+            btn.classList.add('pointer-events-none', 'scale-95'); // Press effect
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            
+            if(audioInit) synthUI.triggerAttackRelease("C5", "32n"); // Clicking sound
+
+            // IMMERSIVE: Simulate Network/Broker Execution Delay
+            await new Promise(r => setTimeout(r, 300 + Math.random() * 400));
+
+            // Restore button state
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 200);
+            btn.classList.remove('pointer-events-none', 'scale-95');
 
             const ticket = Math.floor(100000 + Math.random() * 900000); 
             
@@ -564,17 +661,42 @@
             renderTerminal();
             showToast('Order Filled', `${type} ${vol.toFixed(2)} ${asset.symbol} @ ${price.toFixed(asset.digits)}`);
             
+            // IMMERSIVE: Screen flash, shake, sound, and haptics
+            const body = document.getElementById('app-body');
+            body.classList.add('shake-screen');
+            body.classList.add(type === 'BUY' ? 'flash-buy' : 'flash-sell');
+            setTimeout(() => {
+                body.classList.remove('shake-screen', 'flash-buy', 'flash-sell');
+            }, 500);
+
+            if(audioInit) synthSuccess.triggerAttackRelease(["C5", "E5", "G5"], "8n"); // Success chime
+            triggerVibration([50, 50, 50]);
+
             // Update mobile badge
             document.getElementById('mobile-badge').classList.remove('hidden');
         }
 
-        function closePosition(ticket) {
+        async function closePosition(ticket) {
+            await initAudio();
+            
             const idx = state.positions.findIndex(p => p.ticket === ticket);
             if (idx > -1) {
                 const pos = state.positions[idx];
                 const asset = state.assets.find(a => a.symbol === pos.symbol);
                 const currentPrice = pos.type === 'BUY' ? asset.bid : asset.ask;
                 
+                // IMMERSIVE: Row processing state
+                const row = document.getElementById(`pos-row-${ticket}`);
+                if(row) {
+                    row.classList.add('opacity-50', 'pointer-events-none');
+                    row.innerHTML = `<div class="col-span-10 text-center text-accent-blue flex justify-center items-center gap-2 py-2 text-xs font-sans"><i class="ph ph-spinner-gap animate-spin"></i> Closing #${ticket}...</div>`;
+                }
+                
+                if(audioInit) synthUI.triggerAttackRelease("G4", "32n");
+
+                // IMMERSIVE: Simulate execution delay
+                await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
+
                 pos.profit = calculatePnL(pos);
                 pos.closePrice = currentPrice;
                 pos.closeTime = Date.now();
@@ -586,6 +708,20 @@
                 
                 renderTerminal();
                 showToast('Position Closed', `Order #${ticket} closed. PnL: $${pos.profit.toFixed(2)}`);
+                
+                // IMMERSIVE: Sound and Haptics based on Profit/Loss
+                const body = document.getElementById('app-body');
+                if (pos.profit >= 0) {
+                    if(audioInit) synthSuccess.triggerAttackRelease(["E5", "G5", "C6"], "4n"); // Happy chord
+                    triggerVibration([100, 50, 100]);
+                    body.classList.add('flash-buy');
+                    setTimeout(() => body.classList.remove('flash-buy'), 500);
+                } else {
+                    if(audioInit) synthLoss.triggerAttackRelease(["E3", "C3"], "4n"); // Sad chord
+                    triggerVibration([200]);
+                    body.classList.add('flash-sell');
+                    setTimeout(() => body.classList.remove('flash-sell'), 500);
+                }
                 
                 if(state.positions.length === 0) {
                      document.getElementById('mobile-badge').classList.add('hidden');
@@ -654,7 +790,8 @@
                         const pnlColor = profit >= 0 ? 'text-pnl-up' : 'text-pnl-down';
                         
                         const row = document.createElement('div');
-                        row.className = `grid grid-cols-10 gap-2 px-4 py-2 text-[11px] font-mono border-b border-border-color hover:bg-panel-hover items-center`;
+                        row.id = `pos-row-${pos.ticket}`; // Added ID for animations
+                        row.className = `grid grid-cols-10 gap-2 px-4 py-2 text-[11px] font-mono border-b border-border-color hover:bg-panel-hover items-center transition-all duration-300`;
                         row.innerHTML = `
                             <div class="col-span-2 font-bold font-sans text-text-primary">${pos.symbol}</div>
                             <div class="col-span-1 text-text-secondary">#${pos.ticket}</div>
