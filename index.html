@@ -106,15 +106,17 @@
                 height: 100vh;
                 width: 100vw;
             }
-            .l-header { flex: none; height: 60px; }
-            .mobile-view-container { flex: 1; position: relative; overflow: hidden; }
+            .l-header { flex: none; height: 60px; z-index: 20; }
             .l-market, .l-chart, .l-terminal {
-                position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                display: none; height: 100%; width: 100%;
+                position: relative !important;
+                flex: 1;
+                display: none !important; 
+                height: auto; 
+                width: 100%;
+                padding-bottom: 64px;
             }
             .view-active { display: flex !important; flex-direction: column; }
-            .l-terminal.view-active { padding-bottom: 64px; }
-            #quickTradeWidget { top: auto; bottom: 16px; left: 16px; right: 16px; width: auto; }
+            #quickTradeWidget { top: auto; bottom: 80px; left: 16px; right: 16px; width: auto; }
         }
 
         /* Cyber Animations */
