@@ -87,7 +87,7 @@
         }
 
         .layout-grid.terminal-collapsed {
-            grid-template-rows: 60px 1fr 40px; 
+            grid-template-rows: 60px 1fr 40px !important; 
         }
 
         .l-header { grid-area: 1 / 1 / 2 / 3; }
@@ -185,7 +185,7 @@
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-neon-cyan"></span>
                         </div>
-                        <span class="text-[10px] text-neon-cyan font-bold tracking-widest uppercase">Connected</span>
+                        <span class="text-[10px] text-neon-cyan font-bold tracking-widest uppercase" id="networkStatus">Connected <span class="text-white ml-1 font-mono" id="networkPing">24ms</span></span>
                     </div>
                     <div class="font-mono font-black text-text-primary text-sm sm:text-base tracking-tight" id="headerBalance">$0.00</div>
                 </div>
@@ -200,27 +200,45 @@
         <section id="view-market" class="l-market glass border-r border-border-color flex flex-col z-10 md:view-active relative">
             <div class="absolute inset-0 bg-gradient-to-b from-neon-cyan/5 to-transparent pointer-events-none"></div>
             
-            <div class="p-4 border-b border-border-color flex flex-col gap-4 bg-panel-bg relative z-10">
-                <div class="relative">
-                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-neon-cyan"></i>
-                    <input type="text" id="marketSearch" placeholder="Search markets..." class="w-full bg-app-bg border border-border-color rounded-lg py-2.5 pl-10 pr-3 text-sm text-text-primary focus:border-neon-cyan focus:shadow-glow-cyan transition-all placeholder-text-secondary/50">
+            <div class="flex gap-4 border-b border-border-color px-4 bg-panel-bg h-10 items-center text-[10px] font-bold tracking-widest uppercase shrink-0 relative z-10">
+                <button id="tab-btn-markets" class="text-neon-cyan border-b-2 border-neon-cyan h-full transition-colors" onclick="setLeftTab('markets')">Markets</button>
+                <button id="tab-btn-orderbook" class="text-text-secondary hover:text-text-primary border-b-2 border-transparent h-full transition-colors" onclick="setLeftTab('orderbook')">Order Book</button>
+            </div>
+
+            <div id="panel-markets" class="flex flex-col flex-1 overflow-hidden relative z-10">
+                <div class="p-4 border-b border-border-color flex flex-col gap-4 bg-panel-bg relative z-10">
+                    <div class="relative">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-neon-cyan"></i>
+                        <input type="text" id="marketSearch" placeholder="Search markets..." class="w-full bg-app-bg border border-border-color rounded-lg py-2.5 pl-10 pr-3 text-sm text-text-primary focus:border-neon-cyan focus:shadow-glow-cyan transition-all placeholder-text-secondary/50">
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs font-mono font-bold uppercase tracking-wider" id="categoryFilters">
+                        <button class="px-3 py-1.5 rounded bg-neon-cyan text-black transition-colors" onclick="setCategory('All', this)">All</button>
+                        <button class="px-3 py-1.5 rounded text-text-secondary hover:text-neon-cyan transition-colors" onclick="setCategory('Crypto', this)">Crypto</button>
+                    </div>
                 </div>
-                <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs font-mono font-bold uppercase tracking-wider" id="categoryFilters">
-                    <button class="px-3 py-1.5 rounded bg-neon-cyan text-black transition-colors" onclick="setCategory('All', this)">All</button>
-                    <button class="px-3 py-1.5 rounded text-text-secondary hover:text-neon-cyan transition-colors" onclick="setCategory('Crypto', this)">Crypto</button>
+
+                <div class="grid grid-cols-4 px-4 py-2 border-b border-border-color text-[10px] uppercase tracking-[0.1em] font-bold text-text-secondary bg-app-bg/80 backdrop-blur">
+                    <div class="col-span-2">Asset / Vol</div>
+                    <div class="text-right">Bid</div>
+                    <div class="text-right">Ask</div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto no-scrollbar pb-16 md:pb-0 relative z-10" id="marketList">
+                    <div class="p-8 text-center text-neon-cyan text-xs font-mono flex flex-col items-center gap-2">
+                        <i class="ph ph-spinner-gap animate-spin text-2xl"></i>
+                        Connecting to Binance Live Stream...
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 px-4 py-2 border-b border-border-color text-[10px] uppercase tracking-[0.1em] font-bold text-text-secondary bg-app-bg/80 backdrop-blur">
-                <div class="col-span-2">Asset / Vol</div>
-                <div class="text-right">Bid</div>
-                <div class="text-right">Ask</div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto no-scrollbar pb-16 md:pb-0 relative z-10" id="marketList">
-                <div class="p-8 text-center text-neon-cyan text-xs font-mono flex flex-col items-center gap-2">
-                    <i class="ph ph-spinner-gap animate-spin text-2xl"></i>
-                    Connecting to Binance Live Stream...
+            <div id="panel-orderbook" class="hidden flex-col flex-1 overflow-hidden relative z-10 bg-app-bg">
+                <div class="grid grid-cols-3 px-4 py-2 border-b border-border-color text-[10px] uppercase tracking-[0.1em] font-bold text-text-secondary bg-panel-bg shadow-sm">
+                    <div>Price</div>
+                    <div class="text-right">Size</div>
+                    <div class="text-right">Total</div>
+                </div>
+                <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col text-[11px] font-mono" id="orderbookList">
+                    <!-- Populated by JS -->
                 </div>
             </div>
         </section>
@@ -313,13 +331,13 @@
         <!-- Bottom Trade Terminal -->
         <section id="view-portfolio" class="l-terminal glass border-t border-border-color flex flex-col z-10 hidden md:flex relative overflow-hidden">
             
-            <div class="flex justify-between items-center border-b border-border-color bg-panel-bg w-full h-10">
+            <div class="flex justify-between items-center border-b border-border-color bg-panel-bg w-full h-10 shrink-0">
                 <div class="flex px-2 h-full">
                     <button class="px-6 h-full text-xs font-bold text-neon-cyan border-b-2 border-neon-cyan transition-all uppercase tracking-wider" id="tab-positions" onclick="setTerminalTab('positions')">Open Positions</button>
                     <button class="px-6 h-full text-xs font-bold text-text-secondary hover:text-text-primary border-b-2 border-transparent transition-all uppercase tracking-wider" id="tab-history" onclick="setTerminalTab('history')">System History</button>
                 </div>
-                <button class="px-4 h-full text-text-secondary hover:text-neon-cyan transition-colors border-l border-border-color hidden md:flex items-center justify-center bg-app-bg" onclick="toggleTerminal()" title="Toggle Terminal">
-                    <i class="ph ph-caret-down transition-transform duration-300" id="terminalToggleIcon"></i>
+                <button class="px-4 h-full text-text-secondary hover:text-neon-cyan transition-colors border-l border-border-color hidden md:flex items-center justify-center bg-app-bg cursor-pointer" onclick="toggleTerminal()" title="Toggle Terminal">
+                    <i class="ph ph-caret-down transition-transform duration-300 pointer-events-none" id="terminalToggleIcon"></i>
                 </button>
             </div>
 
@@ -345,6 +363,10 @@
                         <div class="flex gap-2 items-center hidden sm:flex">
                             <span class="text-text-secondary text-[10px] uppercase">Margin</span>
                             <span class="text-text-primary" id="ft-margin">0.00</span>
+                        </div>
+                        <div class="flex gap-2 items-center hidden md:flex border-l border-border-color pl-4 ml-2">
+                            <span class="text-text-secondary text-[10px] uppercase">Margin Level</span>
+                            <span class="text-neon-cyan font-bold" id="ft-margin-level">---%</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 bg-app-bg px-3 py-1.5 rounded border border-border-color">
@@ -491,7 +513,7 @@
         const state = {
             account: { balance: 100000.00, equity: 100000.00, margin: 0, leverage: 100 },
             ui: {
-                activeSymbol: 'BTCUSDT', volume: 1.00, searchQuery: '', activeTab: 'positions', terminalCollapsed: false,
+                activeSymbol: 'BTCUSDT', volume: 1.00, searchQuery: '', activeTab: 'positions', leftTab: 'markets', terminalCollapsed: false,
                 timeframe: '15m', category: 'All', activeTool: 'cursor'
             },
             customDrawings: [],
@@ -505,7 +527,7 @@
             positions: [], history: []
         };
 
-        let lwChart = null, candleSeries = null;
+        let lwChart = null, candleSeries = null, volumeSeries = null;
         let currentLiveCandle = null; // Track current candle for live chart updates
 
         // Audio Setup
@@ -544,6 +566,16 @@
             renderMarketWatch();
             updateQuickTradeWidget();
 
+            // Network Ping Simulator
+            setInterval(() => {
+                const ping = Math.floor(Math.random() * (45 - 12 + 1) + 12);
+                const el = document.getElementById('networkPing');
+                if(el) {
+                    el.innerText = `${ping}ms`;
+                    el.className = `ml-1 font-mono ${ping < 30 ? 'text-pnl-up' : 'text-neon-magenta'}`;
+                }
+            }, 3000);
+
             // 1. Connect to Binance WebSocket for real-time Crypto prices
             try {
                 binanceWs = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
@@ -579,7 +611,8 @@
                     }
                 });
                 
-                if(state.positions.length > 0 && state.ui.activeTab === 'positions') renderTerminal();
+                // Always render the terminal if positions are open so the top header's floating PnL continuously updates
+                if(state.positions.length > 0) renderTerminal();
                 
             }, 750); 
         }
@@ -608,6 +641,7 @@
             // Update Quick Trade and Live Chart Candle
             if(asset.symbol === state.ui.activeSymbol) {
                 updateQuickTradeWidget();
+                if(state.ui.leftTab === 'orderbook') renderOrderBook();
                 
                 if(candleSeries && currentLiveCandle) {
                     const tfIntervals = { '1m': 60, '5m': 300, '15m': 900, '1H': 3600, '1D': 86400 };
@@ -635,6 +669,7 @@
             if(candleSeries) {
                 lwChart.removeSeries(candleSeries);
                 candleSeries = null;
+                if(volumeSeries) { lwChart.removeSeries(volumeSeries); volumeSeries = null; }
                 state.customDrawings = []; 
             }
 
@@ -642,6 +677,7 @@
             const tfIntervals = { '1m': 60, '5m': 300, '15m': 900, '1H': 3600, '1D': 86400 };
             const interval = tfIntervals[state.ui.timeframe] || 900;
             let formattedData = [];
+            let volumeData = [];
 
             try {
                 if (asset.type === 'Crypto') {
@@ -659,6 +695,12 @@
                         low: parseFloat(d[3]),
                         close: parseFloat(d[4])
                     }));
+
+                    volumeData = data.map(d => ({
+                        time: d[0] / 1000,
+                        value: parseFloat(d[5]),
+                        color: parseFloat(d[4]) >= parseFloat(d[1]) ? 'rgba(0, 243, 255, 0.25)' : 'rgba(255, 0, 234, 0.25)'
+                    }));
                     
                     // Sync our local state price to the latest exact Binance price
                     asset.bid = formattedData[formattedData.length - 1].close;
@@ -666,6 +708,16 @@
                 }
 
                 currentLiveCandle = formattedData[formattedData.length - 1];
+
+                volumeSeries = lwChart.addHistogramSeries({
+                    color: '#26a69a',
+                    priceFormat: { type: 'volume' },
+                    priceScaleId: '',
+                });
+                volumeSeries.priceScale().applyOptions({
+                    scaleMargins: { top: 0.85, bottom: 0 },
+                });
+                volumeSeries.setData(volumeData);
 
                 candleSeries = lwChart.addCandlestickSeries({
                     upColor: '#00F3FF',       
@@ -908,6 +960,63 @@
         }
 
         // --- NEW FEATURES HELPER FUNCTIONS ---
+
+        function setLeftTab(tab) {
+            state.ui.leftTab = tab;
+            document.getElementById('tab-btn-markets').className = tab === 'markets' ? "text-neon-cyan border-b-2 border-neon-cyan h-full transition-colors" : "text-text-secondary hover:text-text-primary border-b-2 border-transparent h-full transition-colors";
+            document.getElementById('tab-btn-orderbook').className = tab === 'orderbook' ? "text-neon-cyan border-b-2 border-neon-cyan h-full transition-colors" : "text-text-secondary hover:text-text-primary border-b-2 border-transparent h-full transition-colors";
+            
+            document.getElementById('panel-markets').style.display = tab === 'markets' ? 'flex' : 'none';
+            document.getElementById('panel-orderbook').style.display = tab === 'orderbook' ? 'flex' : 'none';
+            
+            if(tab === 'orderbook') renderOrderBook();
+        }
+
+        function renderOrderBook() {
+            if(state.ui.leftTab !== 'orderbook') return;
+            const container = document.getElementById('orderbookList');
+            const asset = state.assets.find(a => a.symbol === state.ui.activeSymbol);
+            if(!asset || asset.bid === 0) return;
+
+            let html = '';
+            let totalAsk = 0;
+            const volatilityMultiplier = asset.symbol.includes('BTC') ? 2.5 : (asset.symbol.includes('ETH') ? 0.5 : 0.05);
+
+            // Generate Asks (Red) - Highest to lowest
+            for(let i = 12; i >= 1; i--) {
+                const price = asset.bid + (i * volatilityMultiplier);
+                const size = (Math.random() * 3) + 0.1;
+                totalAsk += size;
+                const depth = Math.min((totalAsk / 20) * 100, 100);
+                html += `<div class="grid grid-cols-3 px-4 py-1.5 hover:bg-panel-hover relative cursor-pointer group">
+                    <div class="absolute right-0 top-0 bottom-0 bg-neon-magenta/10 group-hover:bg-neon-magenta/20 transition-colors" style="width: ${depth}%"></div>
+                    <div class="text-neon-magenta z-10">${price.toFixed(asset.digits)}</div>
+                    <div class="text-right text-text-primary z-10">${size.toFixed(3)}</div>
+                    <div class="text-right text-text-secondary z-10">${totalAsk.toFixed(3)}</div>
+                </div>`;
+            }
+            
+            // Spread indicator
+            html += `<div class="px-4 py-2 text-center text-[10px] font-black text-text-secondary bg-app-bg border-y border-border-color shadow-inner flex justify-center items-center gap-2">
+                <span class="w-1 h-1 rounded-full bg-neon-cyan animate-pulse"></span> SPREAD: 0.00 <span class="w-1 h-1 rounded-full bg-neon-magenta animate-pulse"></span>
+            </div>`;
+
+            let totalBid = 0;
+            // Generate Bids (Green) - Lowest to highest
+            for(let i = 1; i <= 12; i++) {
+                const price = asset.bid - (i * volatilityMultiplier);
+                const size = (Math.random() * 3) + 0.1;
+                totalBid += size;
+                const depth = Math.min((totalBid / 20) * 100, 100);
+                html += `<div class="grid grid-cols-3 px-4 py-1.5 hover:bg-panel-hover relative cursor-pointer group">
+                    <div class="absolute right-0 top-0 bottom-0 bg-neon-cyan/10 group-hover:bg-neon-cyan/20 transition-colors" style="width: ${depth}%"></div>
+                    <div class="text-neon-cyan z-10">${price.toFixed(asset.digits)}</div>
+                    <div class="text-right text-text-primary z-10">${size.toFixed(3)}</div>
+                    <div class="text-right text-text-secondary z-10">${totalBid.toFixed(3)}</div>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
 
         function setCategory(cat, btnElement) {
             state.ui.category = cat;
@@ -1152,10 +1261,41 @@
 
         function renderTerminal() {
             const container = document.getElementById('terminalList');
-            container.innerHTML = '';
             
+            // 1. Calculate global metrics FIRST so the header updates regardless of which tab is active
             let totalProfit = 0, usedMargin = 0;
+            state.positions.forEach(pos => {
+                const profit = calculatePnL(pos);
+                totalProfit += profit;
+                usedMargin += (pos.volume * pos.openPrice) / state.account.leverage;
+            });
 
+            state.account.margin = usedMargin;
+            state.account.equity = state.account.balance + totalProfit;
+            const marginLevel = state.account.margin > 0 ? ((state.account.equity / state.account.margin) * 100).toFixed(2) : '---';
+
+            // 2. Update Top Global Header with floating PnL badge
+            const pnlColorH = totalProfit >= 0 ? 'text-pnl-up' : 'text-pnl-down';
+            let headerHtml = formatMoney(state.account.balance);
+            if (state.positions.length > 0) {
+                headerHtml += ` <span class="${pnlColorH} ml-2 text-[11px] font-black bg-panel-bg border border-border-color px-2 py-0.5 rounded-lg shadow-inner tracking-wider">${totalProfit >= 0 ? '+' : ''}${formatMoney(totalProfit)}</span>`;
+            }
+            document.getElementById('headerBalance').innerHTML = headerHtml;
+
+            // 3. Update Bottom Footer Metrics
+            document.getElementById('ft-balance').innerText = formatMoney(state.account.balance);
+            document.getElementById('ft-equity').innerText = formatMoney(state.account.equity);
+            document.getElementById('ft-margin').innerText = formatMoney(state.account.margin);
+            
+            const mlEl = document.getElementById('ft-margin-level');
+            if (mlEl) mlEl.innerText = marginLevel !== '---' ? `${marginLevel}%` : '---%';
+            
+            const pnlEl = document.getElementById('ft-pnl');
+            pnlEl.innerText = `${totalProfit >= 0 ? '+' : ''}${formatMoney(totalProfit)}`;
+            pnlEl.className = `font-black text-sm ${totalProfit > 0 ? 'text-pnl-up' : (totalProfit < 0 ? 'text-pnl-down' : 'text-text-primary')}`;
+
+            // 4. Render Active Tab Content
+            container.innerHTML = '';
             if (state.ui.activeTab === 'positions') {
                 if (state.positions.length === 0) {
                     container.innerHTML = `<div class="p-8 text-center text-text-secondary text-xs font-mono uppercase tracking-widest">No active systems.</div>`;
@@ -1164,8 +1304,6 @@
                         const asset = state.assets.find(a => a.symbol === pos.symbol);
                         const currentPrice = pos.type === 'BUY' ? asset.bid : asset.ask;
                         const profit = calculatePnL(pos);
-                        totalProfit += profit;
-                        usedMargin += (pos.volume * pos.openPrice) / state.account.leverage;
 
                         const typeColor = pos.type === 'BUY' ? 'text-neon-cyan' : 'text-neon-magenta'; 
                         const pnlColor = profit >= 0 ? 'text-pnl-up' : 'text-pnl-down';
@@ -1212,18 +1350,6 @@
                     });
                 }
             }
-
-            state.account.margin = usedMargin;
-            state.account.equity = state.account.balance + totalProfit;
-            
-            document.getElementById('headerBalance').innerText = formatMoney(state.account.balance);
-            document.getElementById('ft-balance').innerText = formatMoney(state.account.balance);
-            document.getElementById('ft-equity').innerText = formatMoney(state.account.equity);
-            document.getElementById('ft-margin').innerText = formatMoney(state.account.margin);
-            
-            const pnlEl = document.getElementById('ft-pnl');
-            pnlEl.innerText = `${totalProfit >= 0 ? '+' : ''}${formatMoney(totalProfit)}`;
-            pnlEl.className = `font-black text-sm ${totalProfit > 0 ? 'text-pnl-up' : (totalProfit < 0 ? 'text-pnl-down' : 'text-text-primary')}`;
         }
 
         // Init Sequence
