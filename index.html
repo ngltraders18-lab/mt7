@@ -191,7 +191,7 @@
                 </div>
                 
                 <div class="w-10 h-10 rounded-xl bg-panel-hover border border-border-color flex items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-neon-cyan hover:shadow-glow-cyan" onclick="toggleProfileModal()">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Cyber&backgroundColor=05050A" alt="User" class="w-full h-full opacity-90">
+                    <i class="ph-fill ph-user text-xl text-text-secondary"></i>
                 </div>
             </div>
         </header>
@@ -379,36 +379,106 @@
             
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-cyan to-neon-magenta"></div>
 
-            <div class="p-8 flex flex-col items-center relative border-b border-border-color bg-panel-bg">
+            <div class="p-6 flex flex-col relative border-b border-border-color bg-panel-bg">
                 <button class="absolute top-4 right-4 text-text-secondary hover:text-neon-cyan transition-colors" onclick="toggleProfileModal()">
                     <i class="ph ph-x text-2xl"></i>
                 </button>
-                <div class="w-24 h-24 rounded-2xl bg-black border border-neon-cyan shadow-glow-cyan overflow-hidden mb-4 relative p-1">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Cyber&backgroundColor=05050A" alt="User" class="w-full h-full rounded-xl">
-                </div>
-                <h2 class="text-2xl font-black text-text-primary tracking-wide">NEO_TRADER</h2>
-                <p class="text-xs text-neon-magenta font-mono mt-1 uppercase tracking-widest">System Admin</p>
                 
-                <div class="flex gap-3 mt-5">
-                    <span class="px-3 py-1 bg-neon-cyan/10 text-neon-cyan text-[10px] rounded border border-neon-cyan/30 uppercase font-bold tracking-widest">Verified</span>
-                    <span class="px-3 py-1 bg-neon-magenta/10 text-neon-magenta text-[10px] rounded border border-neon-magenta/30 uppercase font-bold tracking-widest">1:100 Leverage</span>
+                <div class="flex flex-col mb-4 pt-2">
+                    <h2 class="text-2xl font-black text-text-primary tracking-wide uppercase">Alex Mercer</h2>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs text-neon-cyan font-mono uppercase tracking-widest border border-neon-cyan/30 bg-neon-cyan/10 px-2 py-0.5 rounded">ID: 36101748</span>
+                        <span class="text-[10px] text-pnl-up font-mono uppercase tracking-widest flex items-center gap-1 ml-2"><i class="ph-fill ph-check-circle"></i> Verified</span>
+                    </div>
+                </div>
+                
+                <div class="bg-app-bg border border-border-color rounded-xl p-4 flex justify-between items-center shadow-inner">
+                    <div>
+                        <span class="text-[9px] text-text-secondary uppercase tracking-widest block mb-1">Total Balance</span>
+                        <span class="font-mono text-xl font-black text-text-primary" id="profileBalance">$0.00</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] text-text-secondary uppercase tracking-widest block mb-1">Leverage</span>
+                        <span class="font-mono text-sm font-bold text-neon-magenta border border-neon-magenta/30 bg-neon-magenta/10 px-2 py-0.5 rounded">1:100</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="p-6 bg-app-bg">
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-panel-hover p-4 rounded-xl border border-border-color flex flex-col items-center text-center">
-                        <span class="text-text-secondary text-[10px] uppercase tracking-widest mb-1">Data Stream</span>
-                        <span class="text-neon-cyan font-mono text-sm font-bold">Binance API</span>
-                    </div>
-                    <div class="bg-panel-hover p-4 rounded-xl border border-border-color flex flex-col items-center text-center">
-                        <span class="text-text-secondary text-[10px] uppercase tracking-widest mb-1">Latency</span>
-                        <span class="text-pnl-up font-mono text-sm font-bold flex items-center gap-1"><i class="ph-fill ph-wifi-high"></i> 12ms</span>
+            <div class="p-6 bg-app-bg flex flex-col gap-6">
+                <!-- Financial Actions -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="py-3 rounded-xl bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan hover:text-black hover:shadow-glow-cyan transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs" onclick="brokerAction('Deposit')">
+                        <i class="ph-bold ph-wallet"></i> Deposit
+                    </button>
+                    <button class="py-3 rounded-xl bg-panel-hover border border-border-color text-text-primary hover:border-text-primary hover:bg-white/5 transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs" onclick="brokerAction('Withdrawal')">
+                        <i class="ph-bold ph-bank"></i> Withdraw
+                    </button>
+                </div>
+
+                <!-- Broker Options -->
+                <div>
+                    <span class="text-[10px] text-text-secondary uppercase tracking-widest mb-3 block border-b border-border-color pb-2">Support & Contact</span>
+                    <div class="flex flex-col gap-2">
+                        <button class="w-full p-3 rounded-xl bg-panel-hover border border-border-color hover:border-[#0088cc]/50 hover:bg-[#0088cc]/10 transition-all flex items-center justify-between group" onclick="window.open('https://t.me/MT7Support', '_blank')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-app-bg border border-border-color flex items-center justify-center group-hover:border-[#0088cc] transition-colors">
+                                    <i class="ph-fill ph-telegram-logo text-lg text-[#0088cc]"></i>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-xs font-bold text-text-primary tracking-wide">Telegram Support</span>
+                                    <span class="text-[9px] text-text-secondary font-mono">24/7 Live Agent</span>
+                                </div>
+                            </div>
+                            <i class="ph ph-arrow-up-right text-text-secondary group-hover:text-[#0088cc] transition-colors"></i>
+                        </button>
+                        <button class="w-full p-3 rounded-xl bg-panel-hover border border-border-color hover:border-neon-cyan/50 hover:bg-neon-cyan/10 transition-all flex items-center justify-between group" onclick="window.location.href='mailto:support@mt7.cyber'">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-app-bg border border-border-color flex items-center justify-center group-hover:border-neon-cyan transition-colors">
+                                    <i class="ph-fill ph-envelope-simple text-lg text-text-secondary group-hover:text-neon-cyan transition-colors"></i>
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <span class="text-xs font-bold text-text-primary tracking-wide">Email Support</span>
+                                    <span class="text-[9px] text-text-secondary font-mono">support@mt7.cyber</span>
+                                </div>
+                            </div>
+                            <i class="ph ph-arrow-up-right text-text-secondary group-hover:text-neon-cyan transition-colors"></i>
+                        </button>
                     </div>
                 </div>
 
-                <button class="w-full py-3 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan hover:text-black hover:shadow-glow-cyan transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs" onclick="toggleProfileModal()">
-                    <i class="ph-fill ph-power"></i> Disconnect Node
+                <!-- Footer / Logout -->
+                <button class="w-full py-3 rounded-xl bg-neon-magenta/10 border border-neon-magenta/30 text-neon-magenta hover:bg-neon-magenta hover:text-black hover:shadow-glow-magenta transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs mt-2" onclick="toggleProfileModal()">
+                    <i class="ph-bold ph-sign-out"></i> Secure Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit/Withdraw Modal -->
+    <div id="transferModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-300 p-4">
+        <div class="glass border border-border-color rounded-2xl shadow-panel w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 relative" id="transferContent">
+            
+            <div class="absolute top-0 left-0 w-full h-1" id="transferGradient"></div>
+
+            <div class="p-6 flex flex-col relative border-b border-border-color bg-panel-bg">
+                <button class="absolute top-4 right-4 text-text-secondary hover:text-white transition-colors" onclick="closeTransferModal()">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+                <h2 class="text-xl font-black text-text-primary tracking-wide uppercase" id="transferTitle">Request</h2>
+                <p class="text-[10px] text-text-secondary font-mono mt-1" id="transferDesc">Initiate transfer.</p>
+            </div>
+
+            <div class="p-6 bg-app-bg flex flex-col gap-5">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] text-text-secondary uppercase tracking-widest font-bold block">Amount (USD)</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-secondary font-mono text-lg">$</span>
+                        <input type="number" id="transferAmount" class="w-full bg-panel-hover border border-border-color rounded-xl py-4 pl-9 pr-4 text-xl font-mono font-black text-text-primary focus:border-neon-cyan focus:shadow-glow-cyan transition-all outline-none" placeholder="0.00" min="10" step="10">
+                    </div>
+                </div>
+                
+                <button class="w-full py-4 rounded-xl transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs" id="transferSubmitBtn" onclick="submitTransfer()">
+                    Submit
                 </button>
             </div>
         </div>
@@ -697,12 +767,105 @@
             const content = document.getElementById('profileContent');
             
             if(modal.classList.contains('hidden')) {
+                document.getElementById('profileBalance').innerText = formatMoney(state.account.balance);
                 modal.classList.remove('hidden'); modal.classList.add('flex');
                 setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
             } else {
                 modal.classList.add('opacity-0'); content.classList.add('scale-95');
                 setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
             }
+        }
+
+        let currentTransferAction = '';
+
+        function brokerAction(actionType) {
+            toggleProfileModal();
+            currentTransferAction = actionType;
+            
+            setTimeout(() => {
+                const modal = document.getElementById('transferModal');
+                const content = document.getElementById('transferContent');
+                const title = document.getElementById('transferTitle');
+                const desc = document.getElementById('transferDesc');
+                const btn = document.getElementById('transferSubmitBtn');
+                const gradient = document.getElementById('transferGradient');
+                
+                document.getElementById('transferAmount').value = '';
+                
+                if(actionType === 'Deposit') {
+                    title.innerText = 'Deposit Funds';
+                    desc.innerText = 'Add funds to your trading account via secure node.';
+                    btn.className = "w-full py-4 rounded-xl bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan hover:text-black hover:shadow-glow-cyan transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs";
+                    btn.innerHTML = '<i class="ph-bold ph-wallet"></i> Confirm Deposit Request';
+                    gradient.className = "absolute top-0 left-0 w-full h-1 bg-neon-cyan shadow-glow-cyan";
+                } else {
+                    title.innerText = 'Withdraw Funds';
+                    desc.innerText = `Available to withdraw: ${formatMoney(state.account.balance)}`;
+                    btn.className = "w-full py-4 rounded-xl bg-neon-magenta/10 border border-neon-magenta/50 text-neon-magenta hover:bg-neon-magenta hover:text-black hover:shadow-glow-magenta transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs";
+                    btn.innerHTML = '<i class="ph-bold ph-bank"></i> Submit Withdrawal Request';
+                    gradient.className = "absolute top-0 left-0 w-full h-1 bg-neon-magenta shadow-glow-magenta";
+                }
+                
+                modal.classList.remove('hidden'); modal.classList.add('flex');
+                setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+            }, 300);
+        }
+
+        function closeTransferModal() {
+            const modal = document.getElementById('transferModal');
+            const content = document.getElementById('transferContent');
+            
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        }
+
+        function submitTransfer() {
+            const amountInput = document.getElementById('transferAmount');
+            const amount = parseFloat(amountInput.value);
+            
+            if(isNaN(amount) || amount <= 0) {
+                showToast('Invalid Amount', 'Please enter a valid transfer amount.', true);
+                if(audioInit) synthLoss.triggerAttackRelease(["C3", "G2"], "8n");
+                triggerVibration([200]);
+                return;
+            }
+            
+            if(currentTransferAction === 'Withdrawal' && amount > state.account.balance) {
+                showToast('Request Declined', 'Insufficient available balance.', true);
+                if(audioInit) synthLoss.triggerAttackRelease(["C3", "G2"], "8n");
+                triggerVibration([200]);
+                return;
+            }
+            
+            const btn = document.getElementById('transferSubmitBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-circle-notch animate-spin text-xl"></i> Processing via Node...';
+            btn.classList.add('pointer-events-none', 'opacity-80');
+            
+            setTimeout(() => {
+                if(currentTransferAction === 'Deposit') {
+                    state.account.balance += amount;
+                    state.account.equity += amount;
+                    showToast('Deposit Authorized', `${formatMoney(amount)} securely added to wallet.`);
+                } else {
+                    state.account.balance -= amount;
+                    state.account.equity -= amount;
+                    showToast('Withdrawal Processed', `${formatMoney(amount)} routed to external wallet.`);
+                }
+                
+                document.getElementById('headerBalance').innerText = formatMoney(state.account.balance);
+                document.getElementById('profileBalance').innerText = formatMoney(state.account.balance);
+                renderTerminal(); 
+                
+                closeTransferModal();
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('pointer-events-none', 'opacity-80');
+                }, 300);
+                
+                if(audioInit) synthSuccess.triggerAttackRelease(["C5", "E5", "G5", "C6"], "8n");
+                triggerVibration([50, 50, 50]);
+            }, 1500); 
         }
 
         function toggleTerminal() {
